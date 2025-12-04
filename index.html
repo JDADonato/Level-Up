@@ -7,8 +7,8 @@
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#fef08a">
-    <link rel="icon" href="https://img.icons8.com/fluency/96/lightning-bolt.png">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/96/lightning-bolt.png">
+    <link rel="icon" href="task_logo.png">
+    <link rel="apple-touch-icon" href="task_logo.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -153,7 +153,6 @@
 </head>
 <body class="overflow-x-hidden selection:bg-pink-500/30 selection:text-pink-200">
 
-    <!-- LOADING OVERLAY -->
     <div id="loading-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center flex-col gap-4">
         <div class="relative">
             <div class="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
@@ -162,7 +161,6 @@
         <p class="text-white font-bold tracking-widest uppercase text-xs">Syncing Data...</p>
     </div>
 
-    <!-- AUTH SCREEN -->
     <div id="auth-container" class="auth-screen">
         <div class="w-full max-w-sm glass-panel p-8 rounded-[2.5rem] border border-white/10 shadow-2xl">
             <div class="mb-6 relative inline-block">
@@ -201,7 +199,6 @@
         </div>
     </div>
 
-    <!-- HEADER -->
     <header class="fixed top-0 w-full z-40 border-b backdrop-blur-xl transition-colors duration-300" style="background-color: var(--header-bg); border-color: var(--header-border);">
         <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
             <div id="level-header-area" class="flex items-center gap-3 cursor-pointer group" onclick="openLevelsModal()">
@@ -231,7 +228,6 @@
         </div>
     </header>
 
-    <!-- DASHBOARD -->
     <main class="max-w-4xl mx-auto px-4 pt-24 pb-32">
         <div class="flex justify-between items-end mb-6 px-1">
             <div>
@@ -276,20 +272,16 @@
         </div>
     </main>
 
-    <!-- Floating Action Buttons -->
     <div id="fab-container" class="fixed bottom-8 right-8 flex flex-col gap-4 z-40 items-center">
-        <!-- Reward Bundle Button (Same size/shape as Add Button) -->
         <button onclick="openQuestModal()" class="w-14 h-14 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl shadow-lg border border-white/10 flex items-center justify-center transition-all transform hover:scale-105 active:scale-95 group" title="Create Quest Reward">
              <i class="ph-fill ph-gift text-2xl text-pink-400"></i>
         </button>
 
-        <!-- Add Task Button (Aligned) -->
         <button onclick="openModal('create')" id="add-fab" class="w-14 h-14 bg-gradient-to-br from-yellow-400 to-pink-400 text-black rounded-2xl shadow-[0_8px_30px_rgba(251,207,232,0.4)] flex items-center justify-center transition-all transform hover:scale-105 active:scale-95 group">
             <i class="ph-bold ph-plus text-2xl transition-transform hover:rotate-90"></i>
         </button>
     </div>
 
-    <!-- BUNDLE CREATION BAR -->
     <div id="bundle-bar" class="fixed bottom-0 left-0 w-full glass-panel border-t border-dynamic p-4 z-50 transform translate-y-full transition-transform duration-300 flex justify-between items-center">
         <div>
             <p class="text-dynamic-main font-bold">Select Tasks</p>
@@ -301,9 +293,6 @@
         </div>
     </div>
 
-    <!-- MODALS -->
-
-    <!-- Level Roadmap Modal -->
     <div id="levels-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeLevelsModal()"></div>
         <div class="relative w-full max-w-lg bg-white rounded-[2rem] p-0 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
@@ -317,12 +306,10 @@
                 </div>
             </div>
             <div id="levels-list" class="p-6 pt-8 overflow-y-auto flex-1 custom-scrollbar space-y-4">
-                <!-- Levels Injected Here -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- Bundle Name Modal -->
     <div id="bundle-name-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-xl"></div>
         <div class="relative w-full max-w-sm bg-white rounded-[2rem] p-6 shadow-2xl space-y-4">
@@ -334,7 +321,6 @@
         </div>
     </div>
 
-    <!-- Confirmation Modal -->
     <div id="confirm-modal" class="fixed inset-0 z-[90] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeConfirm()"></div>
         <div class="relative w-full max-w-sm bg-white rounded-[2rem] p-6 text-center shadow-2xl scale-100">
@@ -348,7 +334,6 @@
         </div>
     </div>
 
-    <!-- Reset Data Modal -->
     <div id="reset-modal" class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeResetModal()"></div>
         <div class="relative w-full max-w-sm bg-white rounded-[2rem] p-6 text-center shadow-2xl">
@@ -363,28 +348,23 @@
         </div>
     </div>
 
-    <!-- Settings Modal (White Body, Dark Header) -->
     <div id="settings-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeSettings()"></div>
         <div class="relative w-full max-w-md h-[80vh] bg-white rounded-[2rem] p-0 shadow-2xl flex flex-col overflow-hidden">
             
-            <!-- Dark Header -->
             <div class="px-6 py-5 bg-zinc-900 flex justify-between items-center">
                 <h3 class="text-xl font-bold text-white flex items-center gap-2">Settings <span class="text-pink-400 text-xs bg-white/10 px-2 py-0.5 rounded-full">v2.14</span></h3>
                 <button onclick="closeSettings()" class="text-zinc-400 hover:text-white"><i class="ph-bold ph-x text-xl"></i></button>
             </div>
 
-            <!-- Tabs Container -->
             <div class="flex p-2 gap-2 bg-zinc-100 mx-6 mt-4 rounded-xl shrink-0">
                 <button onclick="switchTab('subjects')" id="tab-subjects" class="flex-1 py-2 text-sm font-bold rounded-lg text-zinc-500 transition-all tab-btn">Subjects</button>
                 <button onclick="switchTab('categories')" id="tab-categories" class="flex-1 py-2 text-sm font-bold rounded-lg text-zinc-500 transition-all tab-btn">Categories</button>
                 <button onclick="switchTab('profile')" id="tab-profile" class="flex-1 py-2 text-sm font-bold rounded-lg text-zinc-500 transition-all tab-btn">Profile</button>
             </div>
 
-            <!-- White Body Content -->
             <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
                 
-                <!-- SUBJECTS -->
                 <div id="content-subjects" class="space-y-4">
                     <div class="flex gap-2 h-12">
                         <input type="text" id="new-subject-input" placeholder="Add subject..." class="flex-1 glass-input rounded-xl p-3 text-sm settings-input">
@@ -393,7 +373,6 @@
                     <div id="subjects-list" class="space-y-2 pb-4"></div>
                 </div>
 
-                <!-- CATEGORIES -->
                 <div id="content-categories" class="hidden space-y-4">
                     <div class="flex gap-2 h-12">
                         <input type="text" id="new-cat-name" placeholder="Name" class="flex-[2] glass-input rounded-xl p-3 text-sm settings-input">
@@ -405,7 +384,6 @@
                     <div id="categories-list" class="space-y-2 pb-4"></div>
                 </div>
 
-                <!-- PROFILE -->
                 <div id="content-profile" class="hidden space-y-6">
                     <div>
                         <label class="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1 block">Your Name</label>
@@ -439,7 +417,6 @@
         </div>
     </div>
 
-    <!-- Task Modal (Dark Header, White Body, Styled Inputs) -->
     <div id="task-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity" onclick="closeModal()"></div>
         <div class="relative w-full max-w-[500px] max-h-[90vh] bg-white rounded-[2rem] flex flex-col transition-all duration-300 transform scale-95 opacity-0 overflow-hidden" id="modal-content">
@@ -480,7 +457,6 @@
         </div>
     </div>
 
-    <!-- Achievement Modal (Matched Style) -->
     <div id="gamification-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeGamification()"></div>
         <div class="relative w-full max-w-lg bg-white rounded-[2rem] p-0 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
@@ -503,7 +479,6 @@
         </div>
     </div>
 
-    <!-- Level Up Modal & Celebration -->
     <div id="levelup-modal" class="fixed inset-0 z-[70] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/90 backdrop-blur-xl"></div>
         <div class="relative w-full max-w-sm glass-panel rounded-[2rem] p-8 text-center border border-yellow-500/50 shadow-[0_0_50px_rgba(252,211,77,0.3)]">
@@ -516,7 +491,6 @@
         </div>
     </div>
 
-    <!-- Bundle Celebration -->
     <div id="celebration-modal" class="fixed inset-0 z-[70] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/90 backdrop-blur-xl" onclick="closeCelebration()"></div>
         <div class="relative w-full max-w-sm glass-panel rounded-[2rem] p-8 text-center border border-pink-500/50 shadow-2xl">
@@ -528,7 +502,6 @@
         </div>
     </div>
 
-    <!-- Guide Modal (Static) -->
     <div id="guide-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-xl" onclick="closeGuide()"></div>
         <div class="relative w-full max-w-md glass-panel rounded-[2rem] p-8 border border-pink-500/20 shadow-2xl flex flex-col max-h-[80vh]">
@@ -611,6 +584,12 @@
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
                 document.getElementById('auth-container').classList.add('hidden');
+                
+                // --- FIX: Render UI immediately with cached data ---
+                if(currentUser.settings) applySettings(currentUser.settings);
+                renderUI(); 
+                
+                // Then fetch fresh data
                 fetchUserData();
             } else {
                 document.getElementById('auth-container').classList.remove('hidden');
@@ -875,11 +854,18 @@
         window.closeConfirm = function() { document.getElementById('confirm-modal').classList.add('hidden'); }
 
         // --- UI LOGIC ---
-        function renderUI() { 
-            if(!currentUser) return; 
-            document.getElementById('greeting').innerText = `Hi ${currentUser.name}`; 
+        function renderUI() { 
+            if(!currentUser) return; 
+            
+            // --- FIX: Add Fallback Name ---
+            const name = currentUser.name || 'Student';
+            document.getElementById('greeting').innerText = `Hi ${name}`; 
+            
             changeTheme(bgColor);
-            renderHeader(); renderBundles(); renderTasks(); renderRewardCard(); 
+            renderHeader(); 
+            renderBundles(); 
+            renderTasks(); 
+            renderRewardCard(); 
         }
         function renderHeader() {
             document.getElementById('level-display').innerText = level; document.getElementById('header-points').innerText = `${xp} XP`;
@@ -911,7 +897,13 @@
         }
         function renderTasks() {
             const list = document.getElementById('task-list'); list.innerHTML = '';
-            if (tasks.length === 0) { document.getElementById('empty-state').classList.remove('hidden'); return; }
+            
+            // --- FIX: Handle Empty Tasks Gracefully ---
+            if (!tasks || tasks.length === 0) { 
+                document.getElementById('empty-state').classList.remove('hidden'); 
+                return; 
+            }
+            
             document.getElementById('empty-state').classList.add('hidden');
             tasks.forEach(task => {
                 const isDone = task.status === 'Completed';
@@ -939,6 +931,54 @@
                 list.appendChild(card);
             });
         }
+        
+        // ... (rest of standard functions) ...
+        function autoCleanup() {
+             // Optional: logic to remove old tasks
+        }
+        function calculateLevel() {
+            // Recalculate level based on XP logic
+            const currentXp = xp;
+            // Simple formula: Level N requires N^1.5 * 100 XP
+            // Reverse: Level = (XP / 100)^(1/1.5)
+            // But since we increment manually, we can just check if we passed the threshold
+            // For now, assume level is stored/synced, or recalculate:
+            let l = 1;
+            while (currentXp >= Math.floor(100 * Math.pow(l, 1.5))) {
+                l++;
+            }
+            if(l > level) { 
+                level = l; 
+                document.getElementById('levelup-level-display').innerText = level;
+                const r = levelRewards[level] || "Mystery Reward";
+                document.getElementById('levelup-reward-name').innerText = r;
+                document.getElementById('levelup-modal').classList.remove('hidden');
+            }
+            level = l;
+            renderHeader();
+        }
+        function claimReward() {
+            document.getElementById('levelup-modal').classList.add('hidden');
+        }
+        function checkManualBadges(task) {
+            // Logic to check badges like Early Bird, etc.
+        }
+        function checkBundles() {
+            rewardBundles.forEach(b => {
+                if(b.completed) return;
+                const allDone = b.taskIds.every(id => {
+                    const t = tasks.find(x => x.id === id);
+                    return t && t.status === 'Completed';
+                });
+                if(allDone) {
+                    b.completed = true;
+                    document.getElementById('celebration-reward-name').innerText = b.name;
+                    document.getElementById('celebration-modal').classList.remove('hidden');
+                    syncSettings();
+                }
+            });
+        }
+        
         function toggleTask(id) {
             if(bundleSelectionMode) return;
             const task = tasks.find(t => t.id === id); if(!task) return;
@@ -968,7 +1008,7 @@
             }
             syncTask('update', task); syncSettings(); calculateLevel();
         }
-        
+
         // --- RENDER HELPERS ---
         function renderSubjectsList() { document.getElementById('subjects-list').innerHTML = subjects.map((s, i) => `<div class="flex justify-between items-center bg-black/5 p-3 rounded-xl border border-dynamic group mb-2"><input type="text" value="${s}" onchange="updateSubject(${i}, this.value)" class="bg-transparent text-sm font-medium text-dynamic-main focus:outline-none w-full border-b border-transparent focus:border-pink-300 transition-colors"><button onclick="removeSubject(${i})" class="text-zinc-600 hover:text-red-400 transition-colors"><i class="ph-bold ph-trash"></i></button></div>`).join(''); }
         window.updateSubject = function(idx, val) { if(val.trim()) { subjects[idx] = val.trim(); syncSettings(); } }
