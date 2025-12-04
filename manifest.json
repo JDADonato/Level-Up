@@ -1,10 +1,10 @@
 {
-  "name": "Growth Tasks",
-  "short_name": "Growth",
+  "name": "Level Up: Student Task Manager",
+  "short_name": "Level Up",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f5eab1",
-  "theme_color": "#f5eab1",
+  "theme_color": "#18181b",
   "description": "Premium Student Task Manager",
   "icons": [
     {
