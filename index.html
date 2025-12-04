@@ -1,726 +1,1657 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Level Up | Premium Task Manager</title>
-    
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#fef08a">
-    <link rel="icon" href="task_logo.png">
-    <link rel="apple-touch-icon" href="task_logo.png">
+
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#18181b" />
+    <link rel="icon" href="task_logo.png" />
+    <link rel="apple-touch-icon" href="task_logo.png" />
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
     <style>
-        :root { 
-            /* Light Mode Defaults */
-            --bg-color: #fef08a; 
-            
-            --text-main: #18181b;       /* Dark text for light bg */
-            --text-muted: #52525b;
-            
-            --glass-bg: rgba(255, 255, 255, 0.6); 
-            --glass-border: rgba(255, 255, 255, 0.6); 
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
-            
-            /* Input Colors (Light) */
-            --input-bg: rgba(255, 255, 255, 0.7);
-            --input-border: rgba(0, 0, 0, 0.05);
-            --input-text: #18181b;
-            --input-placeholder: #71717a;
+      :root {
+        /* Light Mode Defaults */
+        --bg-color: #fef08a;
 
-            /* Header Specifics */
-            --header-bg: rgba(255, 255, 255, 0.9);
-            --header-border: rgba(0, 0, 0, 0.05);
+        --text-main: #18181b;
+        /* Dark text for light bg */
+        --text-muted: #52525b;
 
-            --primary: #fcd34d; 
-            --secondary: #f9a8d4; 
+        --glass-bg: rgba(255, 255, 255, 0.6);
+        --glass-border: rgba(255, 255, 255, 0.6);
+        --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+
+        /* Input Colors (Light) */
+        --input-bg: rgba(255, 255, 255, 0.7);
+        --input-border: rgba(0, 0, 0, 0.05);
+        --input-text: #18181b;
+        --input-placeholder: #71717a;
+
+        /* Header Specifics */
+        --header-bg: rgba(255, 255, 255, 0.9);
+        --header-border: rgba(0, 0, 0, 0.05);
+
+        --primary: #fcd34d;
+        --secondary: #f9a8d4;
+      }
+
+      .dark-theme {
+        /* Dark Mode Overrides */
+        --text-main: #f4f4f5;
+        --text-muted: #a1a1aa;
+
+        --glass-bg: rgba(24, 24, 27, 0.85);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+
+        /* Input Colors (Dark) */
+        --input-bg: rgba(0, 0, 0, 0.4);
+        --input-border: rgba(255, 255, 255, 0.1);
+        --input-text: #f4f4f5;
+        --input-placeholder: #a1a1aa;
+
+        /* Header Specifics */
+        --header-bg: rgba(24, 24, 27, 0.95);
+        --header-border: rgba(255, 255, 255, 0.1);
+      }
+
+      body,
+      .auth-screen {
+        font-family: "Quicksand", sans-serif;
+        background-color: var(--bg-color);
+        background-image: radial-gradient(
+            circle at 10% 20%,
+            rgba(255, 255, 255, 0.15),
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 90% 80%,
+            rgba(255, 255, 255, 0.15),
+            transparent 40%
+          );
+        background-attachment: fixed;
+        color: var(--text-main);
+        min-height: 100vh;
+        transition: color 0.3s ease, background-color 0.5s ease;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .glass-panel {
+        background: var(--glass-bg);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--glass-shadow);
+        transition: all 0.3s ease;
+      }
+
+      .glass-input {
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        color: var(--input-text);
+        transition: all 0.2s ease;
+      }
+
+      .glass-input::placeholder {
+        color: var(--input-placeholder);
+      }
+
+      .glass-input:focus {
+        background: var(--input-bg);
+        border-color: #fcd34d;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(252, 211, 77, 0.2);
+      }
+
+      /* Special Input for White Settings Modal (Always Light) */
+      .settings-input {
+        background: rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        color: #18181b;
+      }
+
+      .settings-input:focus {
+        background: white;
+        border-color: #fcd34d;
+        outline: none;
+      }
+
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: linear-gradient(to bottom, #fcd34d, #f9a8d4);
+        border-radius: 10px;
+      }
+
+      .toast {
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      .custom-check {
+        appearance: none;
+        background-color: var(--input-bg);
+        border: 1px solid var(--input-border);
+      }
+
+      .custom-check:checked {
+        background-color: #fcd34d;
+        border-color: #fcd34d;
+        background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='black' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+      }
+
+      .auth-screen {
+        z-index: 100;
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        text-align: center;
+      }
+
+      .badge-item:hover .badge-tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
+      #loading-overlay {
+        z-index: 200;
+      }
+
+      .selection-mode .task-checkbox {
+        display: block !important;
+      }
+
+      .selection-mode .task-status-btn {
+        display: none !important;
+      }
+
+      .task-checkbox:checked + div {
+        border-color: #fcd34d;
+        background: rgba(252, 211, 77, 0.1);
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
         }
 
-        .dark-theme {
-            /* Dark Mode Overrides */
-            --text-main: #f4f4f5; 
-            --text-muted: #a1a1aa;
-            
-            --glass-bg: rgba(24, 24, 27, 0.85); 
-            --glass-border: rgba(255, 255, 255, 0.1); 
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            
-            /* Input Colors (Dark) */
-            --input-bg: rgba(0, 0, 0, 0.4);
-            --input-border: rgba(255, 255, 255, 0.1);
-            --input-text: #f4f4f5;
-            --input-placeholder: #a1a1aa;
-
-            /* Header Specifics */
-            --header-bg: rgba(24, 24, 27, 0.95);
-            --header-border: rgba(255, 255, 255, 0.1);
+        50% {
+          transform: translateY(-5px);
         }
-        
-        body, .auth-screen { 
-            font-family: 'Quicksand', sans-serif; 
-            background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.15), transparent 40%), 
-                radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.15), transparent 40%); 
-            background-attachment: fixed; 
-            color: var(--text-main); 
-            min-height: 100vh; 
-            transition: color 0.3s ease, background-color 0.5s ease;
-            -webkit-tap-highlight-color: transparent; 
+      }
+
+      .float-anim {
+        animation: float 3s ease-in-out infinite;
+      }
+
+      .xp-fly {
+        position: fixed;
+        pointer-events: none;
+        color: #fcd34d;
+        font-weight: 800;
+        font-size: 1.5rem;
+        z-index: 9999;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        animation: flyToHeader 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      }
+
+      @keyframes flyToHeader {
+        0% {
+          transform: translate(0, 0) scale(1);
+          opacity: 1;
         }
 
-        .glass-panel { 
-            background: var(--glass-bg); 
-            backdrop-filter: blur(24px); 
-            -webkit-backdrop-filter: blur(24px); 
-            border: 1px solid var(--glass-border); 
-            box-shadow: var(--glass-shadow);
-            transition: all 0.3s ease;
+        100% {
+          transform: translate(var(--dx), var(--dy)) scale(0.5);
+          opacity: 0;
         }
+      }
 
-        .glass-input { 
-            background: var(--input-bg); 
-            border: 1px solid var(--input-border); 
-            color: var(--input-text); 
-            transition: all 0.2s ease; 
-        }
-        .glass-input::placeholder { color: var(--input-placeholder); }
-        .glass-input:focus { 
-            background: var(--input-bg);
-            border-color: #fcd34d; 
-            outline: none; 
-            box-shadow: 0 0 0 3px rgba(252, 211, 77, 0.2); 
-        }
-        
-        /* Special Input for White Settings Modal (Always Light) */
-        .settings-input {
-            background: rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            color: #18181b;
-        }
-        .settings-input:focus {
-            background: white;
-            border-color: #fcd34d;
-            outline: none;
-        }
+      .text-dynamic-main {
+        color: var(--text-main);
+      }
 
-        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; } 
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; } 
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: linear-gradient(to bottom, #fcd34d, #f9a8d4); border-radius: 10px; }
-        
-        .toast { transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .toast.show { transform: translateY(0); opacity: 1; }
-        
-        .custom-check { appearance: none; background-color: var(--input-bg); border: 1px solid var(--input-border); }
-        .custom-check:checked { background-color: #fcd34d; border-color: #fcd34d; background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='black' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e"); }
-        
-        .auth-screen { z-index: 100; position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; text-align: center; }
-        .badge-item:hover .badge-tooltip { opacity: 1; visibility: visible; transform: translateY(0); }
-        
-        #loading-overlay { z-index: 200; }
-        
-        .selection-mode .task-checkbox { display: block !important; }
-        .selection-mode .task-status-btn { display: none !important; }
-        .task-checkbox:checked + div { border-color: #fcd34d; background: rgba(252, 211, 77, 0.1); }
+      .text-dynamic-muted {
+        color: var(--text-muted);
+      }
 
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-        .float-anim { animation: float 3s ease-in-out infinite; }
-        
-        .xp-fly {
-            position: fixed; pointer-events: none; color: #fcd34d; font-weight: 800; font-size: 1.5rem; z-index: 9999;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            animation: flyToHeader 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-        }
-        @keyframes flyToHeader {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            100% { transform: translate(var(--dx), var(--dy)) scale(0.5); opacity: 0; }
-        }
-        
-        .text-dynamic-main { color: var(--text-main); }
-        .text-dynamic-muted { color: var(--text-muted); }
-        .border-dynamic { border-color: var(--glass-border); }
-        
-        /* Tab Styles */
-        .tab-btn.active { color: #18181b; border-bottom: 2px solid #18181b; font-weight: 700; }
-        .tab-btn { color: #a1a1aa; border-bottom: 2px solid transparent; }
+      .border-dynamic {
+        border-color: var(--glass-border);
+      }
+
+      /* Tab Styles */
+      .tab-btn.active {
+        color: #18181b;
+        border-bottom: 2px solid #18181b;
+        font-weight: 700;
+      }
+
+      .tab-btn {
+        color: #a1a1aa;
+        border-bottom: 2px solid transparent;
+      }
     </style>
-</head>
-<body class="overflow-x-hidden selection:bg-pink-500/30 selection:text-pink-200">
+  </head>
 
-    <div id="loading-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center flex-col gap-4">
-        <div class="relative">
-            <div class="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
-            <i class="ph-fill ph-lightning absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-yellow-400 text-xl animate-pulse"></i>
-        </div>
-        <p class="text-white font-bold tracking-widest uppercase text-xs">Syncing Data...</p>
+  <body
+    class="overflow-x-hidden selection:bg-pink-500/30 selection:text-pink-200"
+  >
+    <div
+      id="loading-overlay"
+      class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center flex-col gap-4"
+    >
+      <div class="relative">
+        <div
+          class="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin"
+        ></div>
+        <i
+          class="ph-fill ph-lightning absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-yellow-400 text-xl animate-pulse"
+        ></i>
+      </div>
+      <p class="text-white font-bold tracking-widest uppercase text-xs">
+        Syncing Data...
+      </p>
     </div>
 
     <div id="auth-container" class="auth-screen">
-        <div class="w-full max-w-sm glass-panel p-8 rounded-[2.5rem] border border-white/10 shadow-2xl">
-            <div class="mb-6 relative inline-block">
-                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-pink-400 flex items-center justify-center text-black shadow-lg mx-auto">
-                    <i class="ph-bold ph-lightning text-3xl"></i>
-                </div>
-                <div class="absolute -bottom-2 -right-2 bg-white text-black text-[10px] font-bold px-2 py-0.5 rounded-full border border-zinc-200">v2.14</div>
-            </div>
-            <h1 class="text-3xl font-bold text-dynamic-main mb-2 tracking-tight">Level Up</h1>
-            <p class="text-dynamic-muted mb-8 text-sm">Gamify your academic life.</p>
-
-            <div id="login-form" class="space-y-4">
-                <input type="email" id="login-email" class="w-full glass-input rounded-xl p-4 text-center text-sm" placeholder="Email Address">
-                <div class="relative">
-                    <input type="password" id="login-pass" class="w-full glass-input rounded-xl p-4 text-center text-sm" placeholder="Password">
-                    <button onclick="togglePass('login-pass')" class="absolute right-4 top-1/2 -translate-y-1/2 text-dynamic-muted hover:text-dynamic-main"><i class="ph ph-eye"></i></button>
-                </div>
-                <div class="flex items-center justify-center gap-2 text-xs text-zinc-400">
-                    <input type="checkbox" id="login-remember" class="custom-check w-4 h-4 rounded border border-zinc-600">
-                    <label for="login-remember">Keep me logged in</label>
-                </div>
-                <button id="btn-login" onclick="handleAuth('login')" class="w-full bg-gradient-to-r from-pink-500 to-yellow-500 text-white font-bold py-4 rounded-xl shadow-lg hover:scale-[1.02] transition-transform">Log In</button>
-                <p class="text-zinc-500 text-xs mt-4">New here? <button onclick="toggleAuthMode()" class="text-pink-400 font-bold hover:underline">Create Account</button></p>
-            </div>
-
-            <div id="signup-form" class="hidden space-y-4">
-                <input type="text" id="signup-name" class="w-full glass-input rounded-xl p-4 text-center text-sm" placeholder="Your Name">
-                <input type="email" id="signup-email" class="w-full glass-input rounded-xl p-4 text-center text-sm" placeholder="Email Address">
-                <div class="relative">
-                    <input type="password" id="signup-pass" class="w-full glass-input rounded-xl p-4 text-center text-sm" placeholder="Create Password (min 6 chars)">
-                    <button onclick="togglePass('signup-pass')" class="absolute right-4 top-1/2 -translate-y-1/2 text-dynamic-muted hover:text-dynamic-main"><i class="ph ph-eye"></i></button>
-                </div>
-                <button id="btn-signup" onclick="handleAuth('signup')" class="w-full bg-white text-black font-bold py-4 rounded-xl hover:scale-[1.02] transition-transform">Sign Up</button>
-                <p class="text-zinc-500 text-xs mt-4">Has account? <button onclick="toggleAuthMode()" class="text-yellow-400 font-bold hover:underline">Log In</button></p>
-            </div>
+      <div
+        class="w-full max-w-sm glass-panel p-8 rounded-[2.5rem] border border-white/10 shadow-2xl"
+      >
+        <div class="mb-6 relative inline-block">
+          <div
+            class="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-pink-400 flex items-center justify-center text-black shadow-lg mx-auto"
+          >
+            <i class="ph-bold ph-lightning text-3xl"></i>
+          </div>
+          <div
+            class="absolute -bottom-2 -right-2 bg-white text-black text-[10px] font-bold px-2 py-0.5 rounded-full border border-zinc-200"
+          >
+            v2.14
+          </div>
         </div>
+        <h1 class="text-3xl font-bold text-dynamic-main mb-2 tracking-tight">
+          Level Up
+        </h1>
+        <p class="text-dynamic-muted mb-8 text-sm">
+          Gamify your academic life.
+        </p>
+
+        <div id="login-form" class="space-y-4">
+          <input
+            type="email"
+            id="login-email"
+            class="w-full glass-input rounded-xl p-4 text-center text-sm"
+            placeholder="Email Address"
+          />
+          <div class="relative">
+            <input
+              type="password"
+              id="login-pass"
+              class="w-full glass-input rounded-xl p-4 text-center text-sm"
+              placeholder="Password"
+            />
+            <button
+              onclick="togglePass('login-pass')"
+              class="absolute right-4 top-1/2 -translate-y-1/2 text-dynamic-muted hover:text-dynamic-main"
+            >
+              <i class="ph ph-eye"></i>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-center gap-2 text-xs text-zinc-400"
+          >
+            <input
+              type="checkbox"
+              id="login-remember"
+              class="custom-check w-4 h-4 rounded border border-zinc-600"
+            />
+            <label for="login-remember">Keep me logged in</label>
+          </div>
+          <button
+            id="btn-login"
+            onclick="handleAuth('login')"
+            class="w-full bg-gradient-to-r from-pink-500 to-yellow-500 text-white font-bold py-4 rounded-xl shadow-lg hover:scale-[1.02] transition-transform"
+          >
+            Log In
+          </button>
+          <p class="text-zinc-500 text-xs mt-4">
+            New here?
+            <button
+              onclick="toggleAuthMode()"
+              class="text-pink-400 font-bold hover:underline"
+            >
+              Create Account
+            </button>
+          </p>
+        </div>
+
+        <div id="signup-form" class="hidden space-y-4">
+          <input
+            type="text"
+            id="signup-name"
+            class="w-full glass-input rounded-xl p-4 text-center text-sm"
+            placeholder="Your Name"
+          />
+          <input
+            type="email"
+            id="signup-email"
+            class="w-full glass-input rounded-xl p-4 text-center text-sm"
+            placeholder="Email Address"
+          />
+          <div class="relative">
+            <input
+              type="password"
+              id="signup-pass"
+              class="w-full glass-input rounded-xl p-4 text-center text-sm"
+              placeholder="Create Password (min 6 chars)"
+            />
+            <button
+              onclick="togglePass('signup-pass')"
+              class="absolute right-4 top-1/2 -translate-y-1/2 text-dynamic-muted hover:text-dynamic-main"
+            >
+              <i class="ph ph-eye"></i>
+            </button>
+          </div>
+          <button
+            id="btn-signup"
+            onclick="handleAuth('signup')"
+            class="w-full bg-white text-black font-bold py-4 rounded-xl hover:scale-[1.02] transition-transform"
+          >
+            Sign Up
+          </button>
+          <p class="text-zinc-500 text-xs mt-4">
+            Has account?
+            <button
+              onclick="toggleAuthMode()"
+              class="text-yellow-400 font-bold hover:underline"
+            >
+              Log In
+            </button>
+          </p>
+        </div>
+      </div>
     </div>
 
-    <header class="fixed top-0 w-full z-40 border-b backdrop-blur-xl transition-colors duration-300" style="background-color: var(--header-bg); border-color: var(--header-border);">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div id="level-header-area" class="flex items-center gap-3 cursor-pointer group" onclick="openLevelsModal()">
-                <div class="relative w-12 h-12 flex items-center justify-center">
-                    <svg class="w-full h-full transform -rotate-90">
-                        <circle cx="24" cy="24" r="20" stroke="rgba(150,150,150,0.2)" stroke-width="4" fill="none"></circle>
-                        <circle id="level-circle" cx="24" cy="24" r="20" stroke="#fcd34d" stroke-width="4" fill="none" stroke-dasharray="126" stroke-dashoffset="126" class="transition-all duration-1000"></circle>
-                    </svg>
-                    <div class="absolute inset-0 flex items-center justify-center flex-col">
-                        <span class="text-[8px] text-dynamic-muted uppercase font-bold group-hover:text-pink-400">Lvl</span>
-                        <span id="level-display" class="text-sm font-bold text-dynamic-main leading-none">1</span>
-                    </div>
-                </div>
-                <div class="flex flex-col">
-                    <h1 class="font-bold text-lg tracking-wide bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent">Level Up</h1>
-                    <span id="header-points" class="text-xs text-dynamic-muted font-medium group-hover:text-dynamic-main transition-colors">0 XP</span>
-                </div>
+    <header
+      class="fixed top-0 w-full z-40 border-b backdrop-blur-xl transition-colors duration-300"
+      style="
+        background-color: var(--header-bg);
+        border-color: var(--header-border);
+      "
+    >
+      <div
+        class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center"
+      >
+        <div
+          id="level-header-area"
+          class="flex items-center gap-3 cursor-pointer group"
+          onclick="openLevelsModal()"
+        >
+          <div class="relative w-12 h-12 flex items-center justify-center">
+            <svg class="w-full h-full transform -rotate-90">
+              <circle
+                cx="24"
+                cy="24"
+                r="20"
+                stroke="rgba(150,150,150,0.2)"
+                stroke-width="4"
+                fill="none"
+              ></circle>
+              <circle
+                id="level-circle"
+                cx="24"
+                cy="24"
+                r="20"
+                stroke="#fcd34d"
+                stroke-width="4"
+                fill="none"
+                stroke-dasharray="126"
+                stroke-dashoffset="126"
+                class="transition-all duration-1000"
+              ></circle>
+            </svg>
+            <div
+              class="absolute inset-0 flex items-center justify-center flex-col"
+            >
+              <span
+                class="text-[8px] text-dynamic-muted uppercase font-bold group-hover:text-pink-400"
+                >Lvl</span
+              >
+              <span
+                id="level-display"
+                class="text-sm font-bold text-dynamic-main leading-none"
+                >1</span
+              >
             </div>
-            <div class="flex items-center gap-2">
-                <button onclick="openGamification()" class="p-2 rounded-full hover:bg-black/5 text-pink-400 hover:text-pink-500 transition">
-                    <i class="ph-duotone ph-medal text-2xl"></i>
-                </button>
-                <button onclick="openSettings()" class="p-2 rounded-full hover:bg-black/5 text-dynamic-muted hover:text-dynamic-main transition">
-                    <i class="ph ph-gear text-xl"></i>
-                </button>
-            </div>
+          </div>
+          <div class="flex flex-col">
+            <h1
+              class="font-bold text-lg tracking-wide bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent"
+            >
+              Level Up
+            </h1>
+            <span
+              id="header-points"
+              class="text-xs text-dynamic-muted font-medium group-hover:text-dynamic-main transition-colors"
+              >0 XP</span
+            >
+          </div>
         </div>
+        <div class="flex items-center gap-2">
+          <button
+            onclick="openGamification()"
+            class="p-2 rounded-full hover:bg-black/5 text-pink-400 hover:text-pink-500 transition"
+          >
+            <i class="ph-duotone ph-medal text-2xl"></i>
+          </button>
+          <button
+            onclick="openSettings()"
+            class="p-2 rounded-full hover:bg-black/5 text-dynamic-muted hover:text-dynamic-main transition"
+          >
+            <i class="ph ph-gear text-xl"></i>
+          </button>
+        </div>
+      </div>
     </header>
 
     <main class="max-w-4xl mx-auto px-4 pt-24 pb-32">
-        <div class="flex justify-between items-end mb-6 px-1">
-            <div>
-                <h2 class="text-2xl font-bold text-dynamic-main flex items-center gap-2">
-                    <span id="greeting">Hi</span> <span class="text-xl">✨</span>
-                </h2>
-                <div class="text-xs text-dynamic-muted mt-1 flex items-center gap-2">
-                    <span id="next-level-text">Next Level: 100 XP</span>
-                </div>
-            </div>
-            <button onclick="fetchUserData()" class="text-xs font-bold text-pink-400 hover:text-pink-500 flex items-center gap-1.5 px-4 py-2 rounded-full bg-pink-500/10 border border-pink-500/20 transition-all active:scale-95">
-                <i id="sync-icon" class="ph-bold ph-arrows-clockwise"></i> Sync
-            </button>
+      <div class="flex justify-between items-end mb-6 px-1">
+        <div>
+          <h2
+            class="text-2xl font-bold text-dynamic-main flex items-center gap-2"
+          >
+            <span id="greeting">Hi</span> <span class="text-xl">✨</span>
+          </h2>
+          <div class="text-xs text-dynamic-muted mt-1 flex items-center gap-2">
+            <span id="next-level-text">Next Level: 100 XP</span>
+          </div>
         </div>
+        <button
+          onclick="fetchUserData()"
+          class="text-xs font-bold text-pink-400 hover:text-pink-500 flex items-center gap-1.5 px-4 py-2 rounded-full bg-pink-500/10 border border-pink-500/20 transition-all active:scale-95"
+        >
+          <i id="sync-icon" class="ph-bold ph-arrows-clockwise"></i> Sync
+        </button>
+      </div>
 
-        <div id="quest-container" class="space-y-4 mb-4"></div>
+      <div id="quest-container" class="space-y-4 mb-4"></div>
 
-        <div id="level-reward-card" class="hidden mb-6 glass-panel p-5 rounded-3xl border border-yellow-500/20 bg-gradient-to-r from-yellow-500/10 to-pink-500/10 relative overflow-hidden">
-            <div class="flex justify-between items-center relative z-10">
-                <div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-yellow-500">Current Goal</span>
-                    <h3 id="level-reward-name" class="text-lg font-bold text-dynamic-main mt-1">Reward Name</h3>
-                </div>
-                <div class="h-10 w-10 rounded-full bg-gradient-to-br from-yellow-400 to-pink-400 flex items-center justify-center text-black shadow-lg">
-                    <i class="ph-fill ph-gift text-xl"></i>
-                </div>
-            </div>
-            <div class="mt-3 w-full bg-black/10 rounded-full h-1.5 overflow-hidden">
-                <div id="level-progress-bar" class="h-full bg-gradient-to-r from-yellow-400 to-pink-400 w-0 transition-all duration-1000"></div>
-            </div>
-            <p id="xp-needed-text" class="text-[10px] text-dynamic-muted mt-2 text-right">0 XP to go!</p>
+      <div
+        id="level-reward-card"
+        class="hidden mb-6 glass-panel p-5 rounded-3xl border border-yellow-500/20 bg-gradient-to-r from-yellow-500/10 to-pink-500/10 relative overflow-hidden"
+      >
+        <div class="flex justify-between items-center relative z-10">
+          <div>
+            <span
+              class="text-[10px] font-bold uppercase tracking-wider text-yellow-500"
+              >Current Goal</span
+            >
+            <h3
+              id="level-reward-name"
+              class="text-lg font-bold text-dynamic-main mt-1"
+            >
+              Reward Name
+            </h3>
+          </div>
+          <div
+            class="h-10 w-10 rounded-full bg-gradient-to-br from-yellow-400 to-pink-400 flex items-center justify-center text-black shadow-lg"
+          >
+            <i class="ph-fill ph-gift text-xl"></i>
+          </div>
         </div>
-
-        <div id="task-list" class="grid gap-3 md:grid-cols-2 lg:grid-cols-1 transition-all"></div>
-
-        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-center animate-fade-in">
-            <div class="w-24 h-24 bg-black/5 rounded-full flex items-center justify-center mb-4 border border-black/5">
-                <i class="ph-duotone ph-sparkle text-5xl text-yellow-400 opacity-80"></i>
-            </div>
-            <h3 class="text-dynamic-main font-medium">All Caught Up!</h3>
-            <p class="text-dynamic-muted text-sm mt-1">Time to level up. ✨</p>
+        <div class="mt-3 w-full bg-black/10 rounded-full h-1.5 overflow-hidden">
+          <div
+            id="level-progress-bar"
+            class="h-full bg-gradient-to-r from-yellow-400 to-pink-400 w-0 transition-all duration-1000"
+          ></div>
         </div>
+        <p
+          id="xp-needed-text"
+          class="text-[10px] text-dynamic-muted mt-2 text-right"
+        >
+          0 XP to go!
+        </p>
+      </div>
+
+      <div
+        id="task-list"
+        class="grid gap-3 md:grid-cols-2 lg:grid-cols-1 transition-all"
+      ></div>
+
+      <div
+        id="empty-state"
+        class="hidden flex flex-col items-center justify-center py-20 text-center animate-fade-in"
+      >
+        <div
+          class="w-24 h-24 bg-black/5 rounded-full flex items-center justify-center mb-4 border border-black/5"
+        >
+          <i
+            class="ph-duotone ph-sparkle text-5xl text-yellow-400 opacity-80"
+          ></i>
+        </div>
+        <h3 class="text-dynamic-main font-medium">All Caught Up!</h3>
+        <p class="text-dynamic-muted text-sm mt-1">Time to level up. ✨</p>
+      </div>
     </main>
 
-    <div id="fab-container" class="fixed bottom-8 right-8 flex flex-col gap-4 z-40 items-center">
-        <button onclick="openQuestModal()" class="w-14 h-14 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl shadow-lg border border-white/10 flex items-center justify-center transition-all transform hover:scale-105 active:scale-95 group" title="Create Quest Reward">
-             <i class="ph-fill ph-gift text-2xl text-pink-400"></i>
+    <div
+      id="fab-container"
+      class="fixed bottom-8 right-8 flex flex-col gap-4 z-40 items-center"
+    >
+      <button
+        onclick="openQuestModal()"
+        class="w-14 h-14 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl shadow-lg border border-white/10 flex items-center justify-center transition-all transform hover:scale-105 active:scale-95 group"
+        title="Create Quest Reward"
+      >
+        <i class="ph-fill ph-gift text-2xl text-pink-400"></i>
+      </button>
+
+      <button
+        onclick="openModal('create')"
+        id="add-fab"
+        class="w-14 h-14 bg-gradient-to-br from-yellow-400 to-pink-400 text-black rounded-2xl shadow-[0_8px_30px_rgba(251,207,232,0.4)] flex items-center justify-center transition-all transform hover:scale-105 active:scale-95 group"
+      >
+        <i
+          class="ph-bold ph-plus text-2xl transition-transform hover:rotate-90"
+        ></i>
+      </button>
+    </div>
+
+    <div
+      id="bundle-bar"
+      class="fixed bottom-0 left-0 w-full glass-panel border-t border-dynamic p-4 z-50 transform translate-y-full transition-transform duration-300 flex justify-between items-center"
+    >
+      <div>
+        <p class="text-dynamic-main font-bold">Select Tasks</p>
+        <p class="text-xs text-dynamic-muted">Add to reward bundle</p>
+      </div>
+      <div class="flex gap-2">
+        <button
+          onclick="toggleBundleMode()"
+          class="px-4 py-2 rounded-xl bg-zinc-200 text-zinc-800 font-bold text-sm hover:bg-zinc-300"
+        >
+          Cancel
         </button>
-
-        <button onclick="openModal('create')" id="add-fab" class="w-14 h-14 bg-gradient-to-br from-yellow-400 to-pink-400 text-black rounded-2xl shadow-[0_8px_30px_rgba(251,207,232,0.4)] flex items-center justify-center transition-all transform hover:scale-105 active:scale-95 group">
-            <i class="ph-bold ph-plus text-2xl transition-transform hover:rotate-90"></i>
+        <button
+          onclick="finalizeBundleSelection()"
+          class="px-6 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-yellow-500 text-white font-bold text-sm shadow-lg"
+        >
+          Done
         </button>
+      </div>
     </div>
 
-    <div id="bundle-bar" class="fixed bottom-0 left-0 w-full glass-panel border-t border-dynamic p-4 z-50 transform translate-y-full transition-transform duration-300 flex justify-between items-center">
-        <div>
-            <p class="text-dynamic-main font-bold">Select Tasks</p>
-            <p class="text-xs text-dynamic-muted">Add to reward bundle</p>
-        </div>
-        <div class="flex gap-2">
-            <button onclick="toggleBundleMode()" class="px-4 py-2 rounded-xl bg-zinc-200 text-zinc-800 font-bold text-sm hover:bg-zinc-300">Cancel</button>
-            <button onclick="finalizeBundleSelection()" class="px-6 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-yellow-500 text-white font-bold text-sm shadow-lg">Done</button>
-        </div>
-    </div>
-
-    <div id="levels-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeLevelsModal()"></div>
-        <div class="relative w-full max-w-lg bg-white rounded-[2rem] p-0 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-            <div class="p-6 bg-zinc-900 border-b border-zinc-800">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h3 class="text-2xl font-bold text-white flex items-center gap-2"><i class="ph-fill ph-map-trifold text-yellow-400"></i> Roadmap</h3>
-                        <p class="text-xs text-zinc-400 mt-1">Plan your next rewards</p>
-                    </div>
-                    <button onclick="closeLevelsModal()" class="text-zinc-400 hover:text-white"><i class="ph-bold ph-x text-2xl"></i></button>
-                </div>
+    <div
+      id="levels-modal"
+      class="fixed inset-0 z-50 hidden flex items-center justify-center p-4"
+    >
+      <div
+        class="absolute inset-0 bg-black/60 backdrop-blur-md"
+        onclick="closeLevelsModal()"
+      ></div>
+      <div
+        class="relative w-full max-w-lg bg-white rounded-[2rem] p-0 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+      >
+        <div class="p-6 bg-zinc-900 border-b border-zinc-800">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+                <i class="ph-fill ph-map-trifold text-yellow-400"></i> Roadmap
+              </h3>
+              <p class="text-xs text-zinc-400 mt-1">Plan your next rewards</p>
             </div>
-            <div id="levels-list" class="p-6 pt-8 overflow-y-auto flex-1 custom-scrollbar space-y-4">
-                </div>
+            <button
+              onclick="closeLevelsModal()"
+              class="text-zinc-400 hover:text-white"
+            >
+              <i class="ph-bold ph-x text-2xl"></i>
+            </button>
+          </div>
         </div>
+        <div
+          id="levels-list"
+          class="p-6 pt-8 overflow-y-auto flex-1 custom-scrollbar space-y-4"
+        ></div>
+      </div>
     </div>
 
-    <div id="bundle-name-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-xl"></div>
-        <div class="relative w-full max-w-sm bg-white rounded-[2rem] p-6 shadow-2xl space-y-4">
-            <h3 class="text-xl font-bold text-zinc-900">Name Your Quest</h3>
-            <input type="text" id="new-bundle-name" class="w-full glass-input rounded-xl p-3 settings-input" placeholder="e.g. Movie Marathon">
-            <input type="text" id="new-bundle-reward" class="w-full glass-input rounded-xl p-3 settings-input" placeholder="Reward Description">
-            <button onclick="saveBundle()" class="w-full bg-gradient-to-r from-pink-500 to-yellow-500 text-white font-bold py-3 rounded-xl">Create Bundle</button>
-            <button onclick="document.getElementById('bundle-name-modal').classList.add('hidden')" class="w-full text-zinc-500 text-xs hover:text-zinc-900">Cancel</button>
-        </div>
+    <div
+      id="bundle-name-modal"
+      class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4"
+    >
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-xl"></div>
+      <div
+        class="relative w-full max-w-sm bg-white rounded-[2rem] p-6 shadow-2xl space-y-4"
+      >
+        <h3 class="text-xl font-bold text-zinc-900">Name Your Quest</h3>
+        <input
+          type="text"
+          id="new-bundle-name"
+          class="w-full glass-input rounded-xl p-3 settings-input"
+          placeholder="e.g. Movie Marathon"
+        />
+        <input
+          type="text"
+          id="new-bundle-reward"
+          class="w-full glass-input rounded-xl p-3 settings-input"
+          placeholder="Reward Description"
+        />
+        <button
+          onclick="saveBundle()"
+          class="w-full bg-gradient-to-r from-pink-500 to-yellow-500 text-white font-bold py-3 rounded-xl"
+        >
+          Create Bundle
+        </button>
+        <button
+          onclick="document.getElementById('bundle-name-modal').classList.add('hidden')"
+          class="w-full text-zinc-500 text-xs hover:text-zinc-900"
+        >
+          Cancel
+        </button>
+      </div>
     </div>
 
-    <div id="confirm-modal" class="fixed inset-0 z-[90] hidden flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeConfirm()"></div>
-        <div class="relative w-full max-w-sm bg-white rounded-[2rem] p-6 text-center shadow-2xl scale-100">
-            <i class="ph-duotone ph-warning text-4xl text-red-400 mb-4"></i>
-            <h3 id="confirm-title" class="text-xl font-bold text-zinc-900 mb-2">Are you sure?</h3>
-            <p id="confirm-desc" class="text-zinc-500 text-sm mb-6">Action cannot be undone.</p>
-            <div class="flex gap-3">
-                <button onclick="closeConfirm()" class="flex-1 py-3 rounded-xl bg-zinc-200 text-zinc-800 font-bold hover:bg-zinc-300">Cancel</button>
-                <button id="confirm-action-btn" class="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600">Confirm</button>
-            </div>
+    <div
+      id="confirm-modal"
+      class="fixed inset-0 z-[90] hidden flex items-center justify-center p-4"
+    >
+      <div
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onclick="closeConfirm()"
+      ></div>
+      <div
+        class="relative w-full max-w-sm bg-white rounded-[2rem] p-6 text-center shadow-2xl scale-100"
+      >
+        <i class="ph-duotone ph-warning text-4xl text-red-400 mb-4"></i>
+        <h3 id="confirm-title" class="text-xl font-bold text-zinc-900 mb-2">
+          Are you sure?
+        </h3>
+        <p id="confirm-desc" class="text-zinc-500 text-sm mb-6">
+          Action cannot be undone.
+        </p>
+        <div class="flex gap-3">
+          <button
+            onclick="closeConfirm()"
+            class="flex-1 py-3 rounded-xl bg-zinc-200 text-zinc-800 font-bold hover:bg-zinc-300"
+          >
+            Cancel
+          </button>
+          <button
+            id="confirm-action-btn"
+            class="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600"
+          >
+            Confirm
+          </button>
         </div>
+      </div>
     </div>
 
-    <div id="reset-modal" class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeResetModal()"></div>
-        <div class="relative w-full max-w-sm bg-white rounded-[2rem] p-6 text-center shadow-2xl">
-            <h3 class="text-xl font-bold text-zinc-900 mb-2">Danger Zone</h3>
-            <p class="text-zinc-500 text-sm mb-6">Select what to reset.</p>
-            <div class="space-y-3">
-                <button onclick="confirmReset('settings')" class="w-full py-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-sm font-bold">Reset Settings Only</button>
-                <button onclick="confirmReset('game')" class="w-full py-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-sm font-bold">Reset XP & Badges</button>
-                <button onclick="confirmReset('all')" class="w-full py-3 rounded-xl bg-red-500 hover:bg-red-400 text-white text-sm font-bold shadow-lg shadow-red-500/20">Reset Everything</button>
-            </div>
-            <button onclick="closeResetModal()" class="mt-4 text-xs text-zinc-500 underline">Cancel</button>
+    <div
+      id="reset-modal"
+      class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4"
+    >
+      <div
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onclick="closeResetModal()"
+      ></div>
+      <div
+        class="relative w-full max-w-sm bg-white rounded-[2rem] p-6 text-center shadow-2xl"
+      >
+        <h3 class="text-xl font-bold text-zinc-900 mb-2">Danger Zone</h3>
+        <p class="text-zinc-500 text-sm mb-6">Select what to reset.</p>
+        <div class="space-y-3">
+          <button
+            onclick="confirmReset('settings')"
+            class="w-full py-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-sm font-bold"
+          >
+            Reset Settings Only
+          </button>
+          <button
+            onclick="confirmReset('game')"
+            class="w-full py-3 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-sm font-bold"
+          >
+            Reset XP & Badges
+          </button>
+          <button
+            onclick="confirmReset('all')"
+            class="w-full py-3 rounded-xl bg-red-500 hover:bg-red-400 text-white text-sm font-bold shadow-lg shadow-red-500/20"
+          >
+            Reset Everything
+          </button>
         </div>
+        <button
+          onclick="closeResetModal()"
+          class="mt-4 text-xs text-zinc-500 underline"
+        >
+          Cancel
+        </button>
+      </div>
     </div>
 
-    <div id="settings-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeSettings()"></div>
-        <div class="relative w-full max-w-md h-[80vh] bg-white rounded-[2rem] p-0 shadow-2xl flex flex-col overflow-hidden">
-            
-            <div class="px-6 py-5 bg-zinc-900 flex justify-between items-center">
-                <h3 class="text-xl font-bold text-white flex items-center gap-2">Settings <span class="text-pink-400 text-xs bg-white/10 px-2 py-0.5 rounded-full">v2.14</span></h3>
-                <button onclick="closeSettings()" class="text-zinc-400 hover:text-white"><i class="ph-bold ph-x text-xl"></i></button>
-            </div>
-
-            <div class="flex p-2 gap-2 bg-zinc-100 mx-6 mt-4 rounded-xl shrink-0">
-                <button onclick="switchTab('subjects')" id="tab-subjects" class="flex-1 py-2 text-sm font-bold rounded-lg text-zinc-500 transition-all tab-btn">Subjects</button>
-                <button onclick="switchTab('categories')" id="tab-categories" class="flex-1 py-2 text-sm font-bold rounded-lg text-zinc-500 transition-all tab-btn">Categories</button>
-                <button onclick="switchTab('profile')" id="tab-profile" class="flex-1 py-2 text-sm font-bold rounded-lg text-zinc-500 transition-all tab-btn">Profile</button>
-            </div>
-
-            <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
-                
-                <div id="content-subjects" class="space-y-4">
-                    <div class="flex gap-2 h-12">
-                        <input type="text" id="new-subject-input" placeholder="Add subject..." class="flex-1 glass-input rounded-xl p-3 text-sm settings-input">
-                        <button onclick="addSubject()" class="bg-zinc-900 text-white w-12 rounded-xl flex items-center justify-center shadow-lg"><i class="ph-bold ph-plus text-lg"></i></button>
-                    </div>
-                    <div id="subjects-list" class="space-y-2 pb-4"></div>
-                </div>
-
-                <div id="content-categories" class="hidden space-y-4">
-                    <div class="flex gap-2 h-12">
-                        <input type="text" id="new-cat-name" placeholder="Name" class="flex-[2] glass-input rounded-xl p-3 text-sm settings-input">
-                        <div class="flex-1 flex bg-zinc-100 border border-zinc-200 rounded-xl overflow-hidden min-w-[80px]">
-                            <input type="number" id="new-cat-points" value="50" class="w-full bg-transparent text-center text-sm text-zinc-900 focus:outline-none appearance-none h-full">
-                        </div>
-                        <button onclick="addCategory()" class="bg-zinc-900 text-white w-12 shrink-0 rounded-xl flex items-center justify-center shadow-lg"><i class="ph-bold ph-plus text-lg"></i></button>
-                    </div>
-                    <div id="categories-list" class="space-y-2 pb-4"></div>
-                </div>
-
-                <div id="content-profile" class="hidden space-y-6">
-                    <div>
-                        <label class="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1 block">Your Name</label>
-                        <input type="text" id="settings-name" class="w-full glass-input rounded-xl p-3 mt-1 settings-input">
-                    </div>
-                    
-                    <div>
-                        <label class="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">Theme Color</label>
-                        <div class="flex items-center gap-3 bg-zinc-100 p-3 rounded-xl border border-zinc-200">
-                            <input type="color" id="settings-color" onchange="changeTheme(this.value)" class="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0 p-0">
-                            <span class="text-sm text-zinc-600">Pick a background tint</span>
-                        </div>
-                    </div>
-
-                    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
-                        <p class="text-xs text-blue-600"><i class="ph-bold ph-info"></i> Rewards are managed in the Level Menu. Click the <b>XP Circle</b> on the dashboard.</p>
-                    </div>
-
-                    <button onclick="saveProfile()" class="w-full py-3 text-sm font-bold bg-green-500 text-white rounded-xl shadow-lg transition-colors hover:bg-green-600">Save Profile Changes</button>
-                    
-                    <div class="h-px bg-zinc-100 my-4"></div>
-                    
-                    <button onclick="logout()" class="w-full py-3 text-sm font-bold text-zinc-600 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition-colors flex justify-center items-center gap-2">
-                        <i class="ph-bold ph-sign-out"></i> Log Out
-                    </button>
-                    <button onclick="openResetModal()" class="w-full py-3 text-sm font-bold text-red-500 bg-red-50 rounded-xl border border-red-100 hover:bg-red-100 transition-colors">
-                        Reset Data...
-                    </button>
-                </div>
-            </div>
+    <div
+      id="settings-modal"
+      class="fixed inset-0 z-50 hidden flex items-center justify-center p-4"
+    >
+      <div
+        class="absolute inset-0 bg-black/60 backdrop-blur-md"
+        onclick="closeSettings()"
+      ></div>
+      <div
+        class="relative w-full max-w-md h-[80vh] bg-white rounded-[2rem] p-0 shadow-2xl flex flex-col overflow-hidden"
+      >
+        <div class="px-6 py-5 bg-zinc-900 flex justify-between items-center">
+          <h3 class="text-xl font-bold text-white flex items-center gap-2">
+            Settings
+            <span
+              class="text-pink-400 text-xs bg-white/10 px-2 py-0.5 rounded-full"
+              >v2.14</span
+            >
+          </h3>
+          <button
+            onclick="closeSettings()"
+            class="text-zinc-400 hover:text-white"
+          >
+            <i class="ph-bold ph-x text-xl"></i>
+          </button>
         </div>
+
+        <div class="flex p-2 gap-2 bg-zinc-100 mx-6 mt-4 rounded-xl shrink-0">
+          <button
+            onclick="switchTab('subjects')"
+            id="tab-subjects"
+            class="flex-1 py-2 text-sm font-bold rounded-lg text-zinc-500 transition-all tab-btn"
+          >
+            Subjects
+          </button>
+          <button
+            onclick="switchTab('categories')"
+            id="tab-categories"
+            class="flex-1 py-2 text-sm font-bold rounded-lg text-zinc-500 transition-all tab-btn"
+          >
+            Categories
+          </button>
+          <button
+            onclick="switchTab('profile')"
+            id="tab-profile"
+            class="flex-1 py-2 text-sm font-bold rounded-lg text-zinc-500 transition-all tab-btn"
+          >
+            Profile
+          </button>
+        </div>
+
+        <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
+          <div id="content-subjects" class="space-y-4">
+            <div class="flex gap-2 h-12">
+              <input
+                type="text"
+                id="new-subject-input"
+                placeholder="Add subject..."
+                class="flex-1 glass-input rounded-xl p-3 text-sm settings-input"
+              />
+              <button
+                onclick="addSubject()"
+                class="bg-zinc-900 text-white w-12 rounded-xl flex items-center justify-center shadow-lg"
+              >
+                <i class="ph-bold ph-plus text-lg"></i>
+              </button>
+            </div>
+            <div id="subjects-list" class="space-y-2 pb-4"></div>
+          </div>
+
+          <div id="content-categories" class="hidden space-y-4">
+            <div class="flex gap-2 h-12">
+              <input
+                type="text"
+                id="new-cat-name"
+                placeholder="Name"
+                class="flex-[2] glass-input rounded-xl p-3 text-sm settings-input"
+              />
+              <div
+                class="flex-1 flex bg-zinc-100 border border-zinc-200 rounded-xl overflow-hidden min-w-[80px]"
+              >
+                <input
+                  type="number"
+                  id="new-cat-points"
+                  value="50"
+                  class="w-full bg-transparent text-center text-sm text-zinc-900 focus:outline-none appearance-none h-full"
+                />
+              </div>
+              <button
+                onclick="addCategory()"
+                class="bg-zinc-900 text-white w-12 shrink-0 rounded-xl flex items-center justify-center shadow-lg"
+              >
+                <i class="ph-bold ph-plus text-lg"></i>
+              </button>
+            </div>
+            <div id="categories-list" class="space-y-2 pb-4"></div>
+          </div>
+
+          <div id="content-profile" class="hidden space-y-6">
+            <div>
+              <label
+                class="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1 block"
+                >Your Name</label
+              >
+              <input
+                type="text"
+                id="settings-name"
+                class="w-full glass-input rounded-xl p-3 mt-1 settings-input"
+              />
+            </div>
+
+            <div>
+              <label
+                class="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block"
+                >Theme Color</label
+              >
+              <div
+                class="flex items-center gap-3 bg-zinc-100 p-3 rounded-xl border border-zinc-200"
+              >
+                <input
+                  type="color"
+                  id="settings-color"
+                  onchange="changeTheme(this.value)"
+                  class="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0 p-0"
+                />
+                <span class="text-sm text-zinc-600"
+                  >Pick a background tint</span
+                >
+              </div>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+              <p class="text-xs text-blue-600">
+                <i class="ph-bold ph-info"></i> Rewards are managed in the Level
+                Menu. Click the <b>XP Circle</b> on the dashboard.
+              </p>
+            </div>
+
+            <button
+              onclick="saveProfile()"
+              class="w-full py-3 text-sm font-bold bg-green-500 text-white rounded-xl shadow-lg transition-colors hover:bg-green-600"
+            >
+              Save Profile Changes
+            </button>
+
+            <div class="h-px bg-zinc-100 my-4"></div>
+
+            <button
+              onclick="logout()"
+              class="w-full py-3 text-sm font-bold text-zinc-600 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition-colors flex justify-center items-center gap-2"
+            >
+              <i class="ph-bold ph-sign-out"></i> Log Out
+            </button>
+            <button
+              onclick="openResetModal()"
+              class="w-full py-3 text-sm font-bold text-red-500 bg-red-50 rounded-xl border border-red-100 hover:bg-red-100 transition-colors"
+            >
+              Reset Data...
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div id="task-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity" onclick="closeModal()"></div>
-        <div class="relative w-full max-w-[500px] max-h-[90vh] bg-white rounded-[2rem] flex flex-col transition-all duration-300 transform scale-95 opacity-0 overflow-hidden" id="modal-content">
-            <div class="px-6 py-5 flex justify-between items-center shrink-0 bg-zinc-900">
-                <h3 id="modal-title" class="text-xl font-bold text-white">New Task</h3>
-                <button onclick="closeModal()" class="p-2 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition"><i class="ph-bold ph-x text-lg"></i></button>
-            </div>
-            <div class="p-6 overflow-y-auto custom-scrollbar flex-1">
-                <form id="task-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
-                    <input type="hidden" id="task-id">
-                    <div>
-                        <label class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Subject</label>
-                        <select id="task-subject" class="w-full glass-input rounded-xl p-3 appearance-none cursor-pointer text-sm font-medium settings-input" required></select>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Category</label>
-                            <select id="task-category" class="w-full glass-input rounded-xl p-3 appearance-none cursor-pointer text-sm font-medium settings-input"></select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Due Date</label>
-                            <input type="date" id="task-date" class="w-full glass-input rounded-xl p-3 text-sm font-medium settings-input" required>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Notes</label>
-                        <textarea id="task-notes" rows="3" class="w-full glass-input rounded-xl p-3 resize-none text-sm settings-input" placeholder="Details..."></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Link</label>
-                        <input type="url" id="task-link" placeholder="https://" class="w-full glass-input rounded-xl p-3 text-sm settings-input">
-                    </div>
-                    <div id="modal-actions" class="pt-2">
-                        <button type="submit" id="save-btn" class="w-full bg-zinc-900 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-zinc-800 transition">Save Task</button>
-                    </div>
-                </form>
-            </div>
+    <div
+      id="task-modal"
+      class="fixed inset-0 z-50 hidden flex items-center justify-center p-4"
+    >
+      <div
+        class="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity"
+        onclick="closeModal()"
+      ></div>
+      <div
+        class="relative w-full max-w-[500px] max-h-[90vh] bg-white rounded-[2rem] flex flex-col transition-all duration-300 transform scale-95 opacity-0 overflow-hidden"
+        id="modal-content"
+      >
+        <div
+          class="px-6 py-5 flex justify-between items-center shrink-0 bg-zinc-900"
+        >
+          <h3 id="modal-title" class="text-xl font-bold text-white">
+            New Task
+          </h3>
+          <button
+            onclick="closeModal()"
+            class="p-2 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition"
+          >
+            <i class="ph-bold ph-x text-lg"></i>
+          </button>
         </div>
+        <div class="p-6 overflow-y-auto custom-scrollbar flex-1">
+          <form
+            id="task-form"
+            onsubmit="handleFormSubmit(event)"
+            class="space-y-4"
+          >
+            <input type="hidden" id="task-id" />
+            <div>
+              <label
+                class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2"
+                >Subject</label
+              >
+              <select
+                id="task-subject"
+                class="w-full glass-input rounded-xl p-3 appearance-none cursor-pointer text-sm font-medium settings-input"
+                required
+              ></select>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label
+                  class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2"
+                  >Category</label
+                >
+                <select
+                  id="task-category"
+                  class="w-full glass-input rounded-xl p-3 appearance-none cursor-pointer text-sm font-medium settings-input"
+                ></select>
+              </div>
+              <div>
+                <label
+                  class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2"
+                  >Due Date</label
+                >
+                <input
+                  type="date"
+                  id="task-date"
+                  class="w-full glass-input rounded-xl p-3 text-sm font-medium settings-input"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <label
+                class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2"
+                >Notes</label
+              >
+              <textarea
+                id="task-notes"
+                rows="3"
+                class="w-full glass-input rounded-xl p-3 resize-none text-sm settings-input"
+                placeholder="Details..."
+              ></textarea>
+            </div>
+            <div>
+              <label
+                class="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2"
+                >Link</label
+              >
+              <input
+                type="url"
+                id="task-link"
+                placeholder="https://"
+                class="w-full glass-input rounded-xl p-3 text-sm settings-input"
+              />
+            </div>
+            <div id="modal-actions" class="pt-2">
+              <button
+                type="submit"
+                id="save-btn"
+                class="w-full bg-zinc-900 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-zinc-800 transition"
+              >
+                Save Task
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 
-    <div id="gamification-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeGamification()"></div>
-        <div class="relative w-full max-w-lg bg-white rounded-[2rem] p-0 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-            <div class="p-6 bg-zinc-900 border-b border-zinc-800">
-                <div class="flex justify-between items-start">
-                    <div><h3 class="text-2xl font-bold text-white">Achievements</h3><p class="text-xs text-zinc-400 mt-1">Level <span id="modal-level" class="text-yellow-400 font-bold">1</span></p></div>
-                    <button onclick="closeGamification()" class="text-zinc-400 hover:text-white"><i class="ph-bold ph-x text-2xl"></i></button>
-                </div>
+    <div
+      id="gamification-modal"
+      class="fixed inset-0 z-50 hidden flex items-center justify-center p-4"
+    >
+      <div
+        class="absolute inset-0 bg-black/60 backdrop-blur-md"
+        onclick="closeGamification()"
+      ></div>
+      <div
+        class="relative w-full max-w-lg bg-white rounded-[2rem] p-0 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+      >
+        <div class="p-6 bg-zinc-900 border-b border-zinc-800">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="text-2xl font-bold text-white">Achievements</h3>
+              <p class="text-xs text-zinc-400 mt-1">
+                Level
+                <span id="modal-level" class="text-yellow-400 font-bold"
+                  >1</span
+                >
+              </p>
             </div>
-            <div class="p-6 overflow-y-auto space-y-6 custom-scrollbar">
-                <div>
-                    <h4 class="text-xs font-bold text-green-600 uppercase tracking-wider mb-3">Earned</h4>
-                    <div id="badges-earned" class="grid grid-cols-3 gap-3"></div>
-                </div>
-                <div>
-                    <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Locked</h4>
-                    <div id="badges-locked" class="grid grid-cols-3 gap-3"></div>
-                </div>
+            <button
+              onclick="closeGamification()"
+              class="text-zinc-400 hover:text-white"
+            >
+              <i class="ph-bold ph-x text-2xl"></i>
+            </button>
+          </div>
+        </div>
+        <div class="p-6 overflow-y-auto space-y-6 custom-scrollbar">
+          <div>
+            <h4
+              class="text-xs font-bold text-green-600 uppercase tracking-wider mb-3"
+            >
+              Earned
+            </h4>
+            <div id="badges-earned" class="grid grid-cols-3 gap-3"></div>
+          </div>
+          <div>
+            <h4
+              class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3"
+            >
+              Locked
+            </h4>
+            <div id="badges-locked" class="grid grid-cols-3 gap-3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="levelup-modal"
+      class="fixed inset-0 z-[70] hidden flex items-center justify-center p-4"
+    >
+      <div class="absolute inset-0 bg-black/90 backdrop-blur-xl"></div>
+      <div
+        class="relative w-full max-w-sm glass-panel rounded-[2rem] p-8 text-center border border-yellow-500/50 shadow-[0_0_50px_rgba(252,211,77,0.3)]"
+      >
+        <i
+          class="ph-fill ph-crown text-6xl text-yellow-400 mb-4 float-anim"
+        ></i>
+        <h2 class="text-3xl font-bold text-dynamic-main mb-2">Level Up!</h2>
+        <p class="text-dynamic-muted mb-6">
+          You reached Level
+          <span id="levelup-level-display" class="font-bold text-pink-400"
+            >2</span
+          >
+        </p>
+        <div class="bg-black/5 p-4 rounded-xl border border-dynamic mb-6">
+          <h3
+            id="levelup-reward-name"
+            class="text-xl font-bold text-dynamic-main"
+          >
+            Reward Name
+          </h3>
+        </div>
+        <button
+          onclick="claimReward()"
+          class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 rounded-xl mb-3 shadow-lg shadow-yellow-500/20"
+        >
+          Claim & Receipt 🧾
+        </button>
+        <button
+          onclick="document.getElementById('levelup-modal').classList.add('hidden')"
+          class="text-dynamic-muted text-xs hover:text-dynamic-main"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+
+    <div
+      id="celebration-modal"
+      class="fixed inset-0 z-[70] hidden flex items-center justify-center p-4"
+    >
+      <div
+        class="absolute inset-0 bg-black/90 backdrop-blur-xl"
+        onclick="closeCelebration()"
+      ></div>
+      <div
+        class="relative w-full max-w-sm glass-panel rounded-[2rem] p-8 text-center border border-pink-500/50 shadow-2xl"
+      >
+        <i
+          class="ph-fill ph-confetti text-6xl text-pink-400 mb-4 animate-bounce"
+        ></i>
+        <h2 class="text-2xl font-bold text-dynamic-main mb-2">
+          Quest Complete!
+        </h2>
+        <p class="text-dynamic-muted mb-4">You earned your reward:</p>
+        <div class="bg-black/5 p-4 rounded-xl border border-dynamic mb-6">
+          <h3
+            id="celebration-reward-name"
+            class="text-xl font-bold text-dynamic-main"
+          >
+            Reward
+          </h3>
+        </div>
+        <button
+          onclick="closeCelebration()"
+          class="w-full bg-pink-500 text-white font-bold py-3 rounded-xl"
+        >
+          Awesome!
+        </button>
+      </div>
+    </div>
+
+    <div
+      id="guide-modal"
+      class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4"
+    >
+      <div
+        class="absolute inset-0 bg-black/80 backdrop-blur-xl"
+        onclick="closeGuide()"
+      ></div>
+      <div
+        class="relative w-full max-w-md glass-panel rounded-[2rem] p-8 border border-pink-500/20 shadow-2xl flex flex-col max-h-[80vh]"
+      >
+        <div class="text-center mb-6">
+          <h2 class="text-2xl font-bold text-dynamic-main">Guide</h2>
+        </div>
+        <div
+          class="space-y-6 overflow-y-auto custom-scrollbar pr-2 text-sm text-dynamic-muted"
+        >
+          <div class="flex gap-4">
+            <div
+              class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-white font-bold shrink-0"
+            >
+              1
             </div>
-        </div>
-    </div>
-
-    <div id="levelup-modal" class="fixed inset-0 z-[70] hidden flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/90 backdrop-blur-xl"></div>
-        <div class="relative w-full max-w-sm glass-panel rounded-[2rem] p-8 text-center border border-yellow-500/50 shadow-[0_0_50px_rgba(252,211,77,0.3)]">
-            <i class="ph-fill ph-crown text-6xl text-yellow-400 mb-4 float-anim"></i>
-            <h2 class="text-3xl font-bold text-dynamic-main mb-2">Level Up!</h2>
-            <p class="text-dynamic-muted mb-6">You reached Level <span id="levelup-level-display" class="font-bold text-pink-400">2</span></p>
-            <div class="bg-black/5 p-4 rounded-xl border border-dynamic mb-6"><h3 id="levelup-reward-name" class="text-xl font-bold text-dynamic-main">Reward Name</h3></div>
-            <button onclick="claimReward()" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 rounded-xl mb-3 shadow-lg shadow-yellow-500/20">Claim & Receipt 🧾</button>
-            <button onclick="document.getElementById('levelup-modal').classList.add('hidden')" class="text-dynamic-muted text-xs hover:text-dynamic-main">Close</button>
-        </div>
-    </div>
-
-    <div id="celebration-modal" class="fixed inset-0 z-[70] hidden flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/90 backdrop-blur-xl" onclick="closeCelebration()"></div>
-        <div class="relative w-full max-w-sm glass-panel rounded-[2rem] p-8 text-center border border-pink-500/50 shadow-2xl">
-            <i class="ph-fill ph-confetti text-6xl text-pink-400 mb-4 animate-bounce"></i>
-            <h2 class="text-2xl font-bold text-dynamic-main mb-2">Quest Complete!</h2>
-            <p class="text-dynamic-muted mb-4">You earned your reward:</p>
-            <div class="bg-black/5 p-4 rounded-xl border border-dynamic mb-6"><h3 id="celebration-reward-name" class="text-xl font-bold text-dynamic-main">Reward</h3></div>
-            <button onclick="closeCelebration()" class="w-full bg-pink-500 text-white font-bold py-3 rounded-xl">Awesome!</button>
-        </div>
-    </div>
-
-    <div id="guide-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-xl" onclick="closeGuide()"></div>
-        <div class="relative w-full max-w-md glass-panel rounded-[2rem] p-8 border border-pink-500/20 shadow-2xl flex flex-col max-h-[80vh]">
-            <div class="text-center mb-6"><h2 class="text-2xl font-bold text-dynamic-main">Guide</h2></div>
-            <div class="space-y-6 overflow-y-auto custom-scrollbar pr-2 text-sm text-dynamic-muted">
-                <div class="flex gap-4">
-                    <div class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-white font-bold shrink-0">1</div>
-                    <div><p class="font-bold text-dynamic-main">Setup</p><p>Go to <i class="ph-bold ph-gear inline"></i> Settings. Add your <b>Subjects</b> and <b>Categories</b> (like Exams, Homework) so you can create tasks.</p></div>
-                </div>
-                <div class="flex gap-4">
-                    <div class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-white font-bold shrink-0">2</div>
-                    <div><p class="font-bold text-dynamic-main">Tasks & XP</p><p>Click the <b class="text-yellow-400">+</b> button to add tasks. Finishing tasks gives you XP based on the category value.</p></div>
-                </div>
-                <div class="flex gap-4">
-                    <div class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-white font-bold shrink-0">3</div>
-                    <div><p class="font-bold text-dynamic-main">Rewards</p><p>Click the <i class="ph-fill ph-gift inline text-pink-400"></i> button to create a <b>Bundle Reward</b>. Select multiple tasks and set a prize for finishing them all!</p></div>
-                </div>
-                <div class="flex gap-4">
-                    <div class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-white font-bold shrink-0">4</div>
-                    <div><p class="font-bold text-dynamic-main">Level Up</p><p>Earn XP to level up. Each level unlocks a receipt for your configured level reward. Click the XP Circle to plan rewards.</p></div>
-                </div>
+            <div>
+              <p class="font-bold text-dynamic-main">Setup</p>
+              <p>
+                Go to <i class="ph-bold ph-gear inline"></i> Settings. Add your
+                <b>Subjects</b> and <b>Categories</b> (like Exams, Homework) so
+                you can create tasks.
+              </p>
             </div>
-            <button onclick="closeGuide()" class="mt-6 w-full bg-white text-black font-bold py-3 rounded-xl">Got it!</button>
+          </div>
+          <div class="flex gap-4">
+            <div
+              class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-white font-bold shrink-0"
+            >
+              2
+            </div>
+            <div>
+              <p class="font-bold text-dynamic-main">Tasks & XP</p>
+              <p>
+                Click the <b class="text-yellow-400">+</b> button to add tasks.
+                Finishing tasks gives you XP based on the category value.
+              </p>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div
+              class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-white font-bold shrink-0"
+            >
+              3
+            </div>
+            <div>
+              <p class="font-bold text-dynamic-main">Rewards</p>
+              <p>
+                Click the
+                <i class="ph-fill ph-gift inline text-pink-400"></i> button to
+                create a <b>Bundle Reward</b>. Select multiple tasks and set a
+                prize for finishing them all!
+              </p>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div
+              class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-white font-bold shrink-0"
+            >
+              4
+            </div>
+            <div>
+              <p class="font-bold text-dynamic-main">Level Up</p>
+              <p>
+                Earn XP to level up. Each level unlocks a receipt for your
+                configured level reward. Click the XP Circle to plan rewards.
+              </p>
+            </div>
+          </div>
         </div>
+        <button
+          onclick="closeGuide()"
+          class="mt-6 w-full bg-white text-black font-bold py-3 rounded-xl"
+        >
+          Got it!
+        </button>
+      </div>
     </div>
 
-    <canvas id="receipt-canvas" width="400" height="600" class="hidden"></canvas>
-    <div id="toast-container" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[60] pointer-events-none w-max max-w-[90%]"><div id="toast" class="toast glass-panel bg-white/90 px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-pink-500/20 text-black"><i class="ph-fill ph-heart text-pink-400 text-lg"></i><span id="toast-message" class="text-sm font-bold">Updated</span></div></div>
+    <canvas
+      id="receipt-canvas"
+      width="400"
+      height="600"
+      class="hidden"
+    ></canvas>
+    <div
+      id="toast-container"
+      class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[60] pointer-events-none w-max max-w-[90%]"
+    >
+      <div
+        id="toast"
+        class="toast glass-panel bg-white/90 px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-pink-500/20 text-black"
+      >
+        <i class="ph-fill ph-heart text-pink-400 text-lg"></i
+        ><span id="toast-message" class="text-sm font-bold">Updated</span>
+      </div>
+    </div>
 
     <script>
-        // UPDATE WITH YOUR BACKEND URL
-        const API_URL = "https://script.google.com/macros/s/AKfycbx5vDWJWRqwrKYGv_P9DS3WfH7-q7QAJZmmMfP7Zu2WnMrV9unee4aJrBD89IbOxM1QUg/exec"; 
-        
-        // GLOBAL STATE
-        let currentUser = null; 
-        let tasks = [];
-        let xp = 0;
-        let level = 1;
-        let subjects = [];
-        let categories = [];
-        let levelRewards = {}; 
-        let earnedBadges = [];
-        let rewardBundles = []; 
-        let bundleSelectionMode = false;
-        let selectedForBundle = [];
-        let bgColor = "#fef08a"; // Default Pastel Yellow
+      // UPDATE WITH YOUR BACKEND URL
+      const API_URL =
+        "https://script.google.com/macros/s/AKfycbx5vDWJWRqwrKYGv_P9DS3WfH7-q7QAJZmmMfP7Zu2WnMrV9unee4aJrBD89IbOxM1QUg/exec";
 
-        const BADGES = [
-            { id: 'b_novice', icon: 'ph-footprints', name: 'Novice', desc: 'Complete 1 Task', check: (t) => t >= 1 },
-            { id: 'b_apprentice', icon: 'ph-pencil', name: 'Apprentice', desc: 'Complete 10 Tasks', check: (t) => t >= 10 },
-            { id: 'b_master', icon: 'ph-crown', name: 'Master', desc: 'Complete 50 Tasks', check: (t) => t >= 50 },
-            { id: 'b_legend', icon: 'ph-trophy', name: 'Legend', desc: 'Complete 100 Tasks', check: (t) => t >= 100 },
-            { id: 'b_streak', icon: 'ph-fire', name: 'On Fire', desc: 'Earn 1000 XP', check: (t, x) => x >= 1000 },
-            { id: 'b_rich', icon: 'ph-diamond', name: 'Rich', desc: 'Earn 5000 XP', check: (t, x) => x >= 5000 },
-            { id: 'b_level5', icon: 'ph-star', name: 'Rising Star', desc: 'Reach Level 5', check: (t, x, l) => l >= 5 },
-            { id: 'b_level10', icon: 'ph-planet', name: 'Supernova', desc: 'Reach Level 10', check: (t, x, l) => l >= 10 },
-            { id: 'b_early', icon: 'ph-sun', name: 'Early Bird', desc: 'Task done before 8 AM', manual: true },
-            { id: 'b_night', icon: 'ph-moon', name: 'Night Owl', desc: 'Task done after 10 PM', manual: true },
-            { id: 'b_weekend', icon: 'ph-confetti', name: 'Weekender', desc: 'Task done Sat/Sun', manual: true },
-            { id: 'b_bundle', icon: 'ph-gift', name: 'Bundler', desc: 'Complete a Quest Bundle', manual: true }
-        ];
-        const PRAISE = ["Amazing!", "Great job!", "You're glowing! ✨", "Keep it up!", "So productive!", "Unstoppable! 🚀", "Fantastic work!"];
+      // GLOBAL STATE
+      let currentUser = null;
+      let tasks = [];
+      let xp = 0;
+      let level = 1;
+      let subjects = [];
+      let categories = [];
+      let levelRewards = {};
+      let earnedBadges = [];
+      let rewardBundles = [];
+      let bundleSelectionMode = false;
+      let selectedForBundle = [];
+      let bgColor = "#fef08a"; // Default Pastel Yellow
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedUser = localStorage.getItem('growth_user');
-            // SW Registration Logic (Clean up old ones)
-            if ('serviceWorker' in navigator) {
-                (async () => {
-                    try {
-                        const registrations = await navigator.serviceWorker.getRegistrations();
-                        for(let registration of registrations) {
-                            registration.unregister();
-                        }
-                    } catch (e) {
-                        console.warn("Service Worker disabled in this environment:", e);
-                    }
-                })();
+      const BADGES = [
+        {
+          id: "b_novice",
+          icon: "ph-footprints",
+          name: "Novice",
+          desc: "Complete 1 Task",
+          check: (t) => t >= 1,
+        },
+        {
+          id: "b_apprentice",
+          icon: "ph-pencil",
+          name: "Apprentice",
+          desc: "Complete 10 Tasks",
+          check: (t) => t >= 10,
+        },
+        {
+          id: "b_master",
+          icon: "ph-crown",
+          name: "Master",
+          desc: "Complete 50 Tasks",
+          check: (t) => t >= 50,
+        },
+        {
+          id: "b_legend",
+          icon: "ph-trophy",
+          name: "Legend",
+          desc: "Complete 100 Tasks",
+          check: (t) => t >= 100,
+        },
+        {
+          id: "b_streak",
+          icon: "ph-fire",
+          name: "On Fire",
+          desc: "Earn 1000 XP",
+          check: (t, x) => x >= 1000,
+        },
+        {
+          id: "b_rich",
+          icon: "ph-diamond",
+          name: "Rich",
+          desc: "Earn 5000 XP",
+          check: (t, x) => x >= 5000,
+        },
+        {
+          id: "b_level5",
+          icon: "ph-star",
+          name: "Rising Star",
+          desc: "Reach Level 5",
+          check: (t, x, l) => l >= 5,
+        },
+        {
+          id: "b_level10",
+          icon: "ph-planet",
+          name: "Supernova",
+          desc: "Reach Level 10",
+          check: (t, x, l) => l >= 10,
+        },
+        {
+          id: "b_early",
+          icon: "ph-sun",
+          name: "Early Bird",
+          desc: "Task done before 8 AM",
+          manual: true,
+        },
+        {
+          id: "b_night",
+          icon: "ph-moon",
+          name: "Night Owl",
+          desc: "Task done after 10 PM",
+          manual: true,
+        },
+        {
+          id: "b_weekend",
+          icon: "ph-confetti",
+          name: "Weekender",
+          desc: "Task done Sat/Sun",
+          manual: true,
+        },
+        {
+          id: "b_bundle",
+          icon: "ph-gift",
+          name: "Bundler",
+          desc: "Complete a Quest Bundle",
+          manual: true,
+        },
+      ];
+      const PRAISE = [
+        "Amazing!",
+        "Great job!",
+        "You're glowing! ✨",
+        "Keep it up!",
+        "So productive!",
+        "Unstoppable! 🚀",
+        "Fantastic work!",
+      ];
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const savedUser = localStorage.getItem("growth_user");
+        // SW Registration Logic (Clean up old ones)
+        if ("serviceWorker" in navigator) {
+          (async () => {
+            try {
+              const registrations =
+                await navigator.serviceWorker.getRegistrations();
+              for (let registration of registrations) {
+                registration.unregister();
+              }
+            } catch (e) {
+              console.warn("Service Worker disabled in this environment:", e);
             }
-            
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                document.getElementById('auth-container').classList.add('hidden');
-                
-                // --- FIX: Render UI immediately with cached data ---
-                if(currentUser.settings) applySettings(currentUser.settings);
-                renderUI(); 
-                
-                // Then fetch fresh data
-                fetchUserData();
-            } else {
-                document.getElementById('auth-container').classList.remove('hidden');
-            }
+          })();
+        }
+
+        if (savedUser) {
+          currentUser = JSON.parse(savedUser);
+          document.getElementById("auth-container").classList.add("hidden");
+
+          // --- FIX: Render UI immediately with cached data ---
+          if (currentUser.settings) applySettings(currentUser.settings);
+          renderUI();
+
+          // Then fetch fresh data
+          fetchUserData();
+        } else {
+          document.getElementById("auth-container").classList.remove("hidden");
+        }
+      });
+
+      // --- GLOBAL ACTIONS ---
+      window.openGamification = function () {
+        document
+          .getElementById("gamification-modal")
+          .classList.remove("hidden");
+        const earnedDiv = document.getElementById("badges-earned");
+        const lockedDiv = document.getElementById("badges-locked");
+        earnedDiv.innerHTML = "";
+        lockedDiv.innerHTML = "";
+        BADGES.forEach((b) => {
+          const unlocked = earnedBadges.includes(b.id);
+          const el = document.createElement("div");
+          // Badge styling for white modal
+          el.className = `flex flex-col items-center text-center gap-2 p-3 rounded-2xl border badge-item relative group ${
+            unlocked
+              ? "bg-yellow-50 border-yellow-200"
+              : "opacity-40 border-zinc-100 grayscale"
+          }`;
+          el.innerHTML = `<i class="ph-duotone ${b.icon} text-3xl ${
+            unlocked ? "text-yellow-500" : "text-zinc-400"
+          }"></i><div><p class="text-[10px] font-bold text-zinc-800">${
+            b.name
+          }</p></div><div class="badge-tooltip absolute bottom-full mb-2 w-32 bg-black text-white text-[10px] p-2 rounded shadow-lg opacity-0 invisible transition-all z-10 pointer-events-none">${
+            b.desc
+          }</div>`;
+          if (unlocked) earnedDiv.appendChild(el);
+          else lockedDiv.appendChild(el);
         });
+      };
+      window.closeGamification = function () {
+        document.getElementById("gamification-modal").classList.add("hidden");
+      };
 
-        // --- GLOBAL ACTIONS ---
-        window.openGamification = function() {
-            document.getElementById('gamification-modal').classList.remove('hidden');
-            const earnedDiv = document.getElementById('badges-earned'); const lockedDiv = document.getElementById('badges-locked');
-            earnedDiv.innerHTML = ''; lockedDiv.innerHTML = '';
-            BADGES.forEach(b => {
-                const unlocked = earnedBadges.includes(b.id);
-                const el = document.createElement('div');
-                // Badge styling for white modal
-                el.className = `flex flex-col items-center text-center gap-2 p-3 rounded-2xl border badge-item relative group ${unlocked ? 'bg-yellow-50 border-yellow-200' : 'opacity-40 border-zinc-100 grayscale'}`;
-                el.innerHTML = `<i class="ph-duotone ${b.icon} text-3xl ${unlocked ? 'text-yellow-500' : 'text-zinc-400'}"></i><div><p class="text-[10px] font-bold text-zinc-800">${b.name}</p></div><div class="badge-tooltip absolute bottom-full mb-2 w-32 bg-black text-white text-[10px] p-2 rounded shadow-lg opacity-0 invisible transition-all z-10 pointer-events-none">${b.desc}</div>`;
-                if(unlocked) earnedDiv.appendChild(el); else lockedDiv.appendChild(el);
-            });
+      window.openQuestModal = function () {
+        const elig = tasks.filter((t) => t.status !== "Completed");
+        if (elig.length === 0) {
+          showToast("Create tasks first! 🎯", true);
+          return;
         }
-        window.closeGamification = function() { document.getElementById('gamification-modal').classList.add('hidden'); }
-        
-        window.openQuestModal = function() {
-            const elig = tasks.filter(t => t.status !== 'Completed');
-            if(elig.length === 0) { showToast("Create tasks first! 🎯", true); return; }
-            toggleBundleMode();
-        }
-        
-        window.saveProfile = function() {
-            const nameVal = document.getElementById('settings-name').value.trim();
-            const colorVal = document.getElementById('settings-color').value;
-            if(nameVal) currentUser.name = nameVal;
-            bgColor = colorVal;
-            localStorage.setItem('growth_user', JSON.stringify(currentUser));
-            syncSettings(); renderUI(); showToast("Profile Saved! ✅");
-        }
+        toggleBundleMode();
+      };
 
-        window.handleAuth = async function(mode) {
-            const btn = document.getElementById(`btn-${mode}`); const txt = btn.innerHTML; btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i>'; btn.disabled = true;
-            const payload = { action: mode, data: {} };
-            if (mode === 'signup') {
-                const name = document.getElementById('signup-name').value.trim(), email = document.getElementById('signup-email').value.trim(), pass = document.getElementById('signup-pass').value;
-                if(!name || !email || !pass) { showToast("Fill all fields", true); btn.innerHTML = txt; btn.disabled = false; return; }
-                payload.data = { name, email, password: pass };
-            } else {
-                const email = document.getElementById('login-email').value.trim(), pass = document.getElementById('login-pass').value;
-                if(!email || !pass) { showToast("Fill all fields", true); btn.innerHTML = txt; btn.disabled = false; return; }
-                payload.data = { email, password: pass };
-            }
-            try {
-                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }); const json = await res.json();
-                if(json.status === 'success') {
-                    currentUser = { userId: json.userId, name: json.name, email: json.email };
-                    if(document.getElementById('login-remember').checked || mode === 'signup') localStorage.setItem('growth_user', JSON.stringify(currentUser));
-                    if(json.settings) applySettings(json.settings);
-                    document.getElementById('auth-container').classList.add('hidden'); fetchUserData();
-                } else showToast(json.message, true);
-            } catch(e) { showToast("Connection Error", true); } finally { btn.innerHTML = txt; btn.disabled = false; }
-        }
+      window.saveProfile = function () {
+        const nameVal = document.getElementById("settings-name").value.trim();
+        const colorVal = document.getElementById("settings-color").value;
+        if (nameVal) currentUser.name = nameVal;
+        bgColor = colorVal;
+        localStorage.setItem("growth_user", JSON.stringify(currentUser));
+        syncSettings();
+        renderUI();
+        showToast("Profile Saved! ✅");
+      };
 
-        window.fetchUserData = async function() {
-            if (!currentUser) return;
-            showLoading(true);
-            try {
-                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'fetch_tasks', userId: currentUser.userId }) });
-                const json = await res.json();
-                if (json.status === 'success') {
-                    tasks = json.tasks || [];
-                    if(json.settings) applySettings(json.settings);
-                    autoCleanup(); calculateLevel(); renderUI();
-                } else {
-                    showToast("Fetch Failed: " + json.message, true);
-                }
-            } catch(e) {
-                showToast("Network Error: Unable to sync", true);
-            } finally { showLoading(false); }
+      window.handleAuth = async function (mode) {
+        const btn = document.getElementById(`btn-${mode}`);
+        const txt = btn.innerHTML;
+        btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i>';
+        btn.disabled = true;
+        const payload = { action: mode, data: {} };
+        if (mode === "signup") {
+          const name = document.getElementById("signup-name").value.trim(),
+            email = document.getElementById("signup-email").value.trim(),
+            pass = document.getElementById("signup-pass").value;
+          if (!name || !email || !pass) {
+            showToast("Fill all fields", true);
+            btn.innerHTML = txt;
+            btn.disabled = false;
+            return;
+          }
+          payload.data = { name, email, password: pass };
+        } else {
+          const email = document.getElementById("login-email").value.trim(),
+            pass = document.getElementById("login-pass").value;
+          if (!email || !pass) {
+            showToast("Fill all fields", true);
+            btn.innerHTML = txt;
+            btn.disabled = false;
+            return;
+          }
+          payload.data = { email, password: pass };
         }
+        try {
+          const res = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify(payload),
+          });
+          const json = await res.json();
+          if (json.status === "success") {
+            currentUser = {
+              userId: json.userId,
+              name: json.name,
+              email: json.email,
+            };
+            if (
+              document.getElementById("login-remember").checked ||
+              mode === "signup"
+            )
+              localStorage.setItem("growth_user", JSON.stringify(currentUser));
+            if (json.settings) applySettings(json.settings);
+            document.getElementById("auth-container").classList.add("hidden");
+            fetchUserData();
+          } else showToast(json.message, true);
+        } catch (e) {
+          showToast("Connection Error", true);
+        } finally {
+          btn.innerHTML = txt;
+          btn.disabled = false;
+        }
+      };
 
-        window.syncTask = async function(action, taskData) {
-            if (!currentUser) return;
-            if (action === 'create') tasks.push(taskData);
-            if (action === 'update') { const idx = tasks.findIndex(t => t.id === taskData.id); if(idx > -1) tasks[idx] = taskData; }
-            if (action === 'delete') tasks = tasks.filter(t => t.id !== taskData.id);
+      window.fetchUserData = async function () {
+        if (!currentUser) return;
+        showLoading(true);
+        try {
+          const res = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({
+              action: "fetch_tasks",
+              userId: currentUser.userId,
+            }),
+          });
+          const json = await res.json();
+          if (json.status === "success") {
+            tasks = json.tasks || [];
+            if (json.settings) applySettings(json.settings);
+            autoCleanup();
+            calculateLevel();
             renderUI();
-            if(action === 'delete') showToast("Task deleted"); else if(action === 'create') showToast("Task saved");
-            await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'sync', userId: currentUser.userId, taskAction: action, task: taskData }) });
+          } else {
+            showToast("Fetch Failed: " + json.message, true);
+          }
+        } catch (e) {
+          showToast("Network Error: Unable to sync", true);
+        } finally {
+          showLoading(false);
         }
+      };
 
-        window.saveBundle = function() {
-            const name = document.getElementById('new-bundle-name').value.trim();
-            const rew = document.getElementById('new-bundle-reward').value.trim();
-            if(!name) { showToast("Name required", true); return; }
-            rewardBundles.push({ id: Date.now(), name: name + (rew ? ` (${rew})` : ''), taskIds: selectedForBundle, completed: false });
-            syncSettings(); document.getElementById('bundle-name-modal').classList.add('hidden');
-            toggleBundleMode(); renderUI(); showToast("Quest Created! ⚔️");
+      window.syncTask = async function (action, taskData) {
+        if (!currentUser) return;
+        if (action === "create") tasks.push(taskData);
+        if (action === "update") {
+          const idx = tasks.findIndex((t) => t.id === taskData.id);
+          if (idx > -1) tasks[idx] = taskData;
         }
+        if (action === "delete")
+          tasks = tasks.filter((t) => t.id !== taskData.id);
+        renderUI();
+        if (action === "delete") showToast("Task deleted");
+        else if (action === "create") showToast("Task saved");
+        await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "sync",
+            userId: currentUser.userId,
+            taskAction: action,
+            task: taskData,
+          }),
+        });
+      };
 
-        // --- HELPER FUNCTIONS ---
-        function applySettings(s) {
-            if (s.subjects && Array.isArray(s.subjects)) subjects = s.subjects; 
-            if (s.categories && Array.isArray(s.categories)) categories = s.categories; 
-            if (s.levelRewards) levelRewards = s.levelRewards;
-            if (s.xp) xp = parseInt(s.xp); 
-            if (s.earnedBadges) earnedBadges = s.earnedBadges;
-            if (s.rewardBundles) rewardBundles = s.rewardBundles;
-            if (s.bgColor) bgColor = s.bgColor; 
-            if (s.userName) { currentUser.name = s.userName; localStorage.setItem('growth_user', JSON.stringify(currentUser)); }
+      window.saveBundle = function () {
+        const name = document.getElementById("new-bundle-name").value.trim();
+        const rew = document.getElementById("new-bundle-reward").value.trim();
+        if (!name) {
+          showToast("Name required", true);
+          return;
         }
+        rewardBundles.push({
+          id: Date.now(),
+          name: name + (rew ? ` (${rew})` : ""),
+          taskIds: selectedForBundle,
+          completed: false,
+        });
+        syncSettings();
+        document.getElementById("bundle-name-modal").classList.add("hidden");
+        toggleBundleMode();
+        renderUI();
+        showToast("Quest Created! ⚔️");
+      };
 
-        async function syncSettings() {
-            if(!currentUser) return;
-            const settings = { subjects, categories, levelRewards, xp, earnedBadges, rewardBundles, userName: currentUser.name, bgColor };
-            await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'sync', userId: currentUser.userId, settings }) });
+      // --- HELPER FUNCTIONS ---
+      function applySettings(s) {
+        if (s.subjects && Array.isArray(s.subjects)) subjects = s.subjects;
+        if (s.categories && Array.isArray(s.categories))
+          categories = s.categories;
+        if (s.levelRewards) levelRewards = s.levelRewards;
+        if (s.xp) xp = parseInt(s.xp);
+        if (s.earnedBadges) earnedBadges = s.earnedBadges;
+        if (s.rewardBundles) rewardBundles = s.rewardBundles;
+        if (s.bgColor) bgColor = s.bgColor;
+        if (s.userName) {
+          currentUser.name = s.userName;
+          localStorage.setItem("growth_user", JSON.stringify(currentUser));
         }
+      }
 
-        // --- LEVEL ROADMAP (Infinite Pagination) ---
-        window.openLevelsModal = function() {
-            document.getElementById('levels-modal').classList.remove('hidden');
-            const list = document.getElementById('levels-list');
-            list.innerHTML = '';
-            
-            const startLevel = Math.floor((level - 1) / 5) * 5 + 1;
-            
-            for(let i = startLevel; i < startLevel + 10; i++) { 
-                const xpNeeded = Math.floor(100 * Math.pow(i, 1.5));
-                const existingReward = levelRewards[i] || "";
-                const isCurrent = i === level;
-                
-                // Styling for White Modal Body
-                list.innerHTML += `
-                    <div class="bg-zinc-50 p-4 rounded-2xl border ${isCurrent ? 'border-yellow-400 bg-yellow-50' : 'border-zinc-100'} mb-2">
+      async function syncSettings() {
+        if (!currentUser) return;
+        const settings = {
+          subjects,
+          categories,
+          levelRewards,
+          xp,
+          earnedBadges,
+          rewardBundles,
+          userName: currentUser.name,
+          bgColor,
+        };
+        await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "sync",
+            userId: currentUser.userId,
+            settings,
+          }),
+        });
+      }
+
+      // --- LEVEL ROADMAP (Infinite Pagination) ---
+      window.openLevelsModal = function () {
+        document.getElementById("levels-modal").classList.remove("hidden");
+        const list = document.getElementById("levels-list");
+        list.innerHTML = "";
+
+        const startLevel = Math.floor((level - 1) / 5) * 5 + 1;
+
+        for (let i = startLevel; i < startLevel + 10; i++) {
+          const xpNeeded = Math.floor(100 * Math.pow(i, 1.5));
+          const existingReward = levelRewards[i] || "";
+          const isCurrent = i === level;
+
+          // Styling for White Modal Body
+          list.innerHTML += `
+                    <div class="bg-zinc-50 p-4 rounded-2xl border ${
+                      isCurrent
+                        ? "border-yellow-400 bg-yellow-50"
+                        : "border-zinc-100"
+                    } mb-2">
                         <div class="flex justify-between mb-1 items-center">
                             <span class="text-zinc-900 font-bold text-lg">Level ${i}</span>
                             <span class="text-[10px] uppercase font-bold text-zinc-500 bg-white px-2 py-1 rounded border border-zinc-200">${xpNeeded} XP</span>
@@ -733,292 +1664,588 @@
                         </div>
                     </div>
                 `;
-            }
         }
-        window.closeLevelsModal = function() { document.getElementById('levels-modal').classList.add('hidden'); }
-        window.updateLevelReward = function(lvl, val) { levelRewards[lvl] = val; syncSettings(); renderRewardCard(); }
+      };
+      window.closeLevelsModal = function () {
+        document.getElementById("levels-modal").classList.add("hidden");
+      };
+      window.updateLevelReward = function (lvl, val) {
+        levelRewards[lvl] = val;
+        syncSettings();
+        renderRewardCard();
+      };
 
-        // --- COLOR THEME ---
-        window.changeTheme = function(color) {
-            bgColor = color;
-            document.documentElement.style.setProperty('--bg-color', color);
-            document.body.style.backgroundColor = color;
-            document.body.style.backgroundImage = `radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.1), transparent 40%), radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.1), transparent 40%)`;
-            
-            // Check brightness to toggle dark text
-            const r = parseInt(color.substr(1,2),16);
-            const g = parseInt(color.substr(3,2),16);
-            const b = parseInt(color.substr(5,2),16);
-            const yiq = ((r*299)+(g*587)+(b*114))/1000;
-            
-            if(yiq >= 128) {
-                document.body.classList.remove('dark-theme');
-            } else {
-                document.body.classList.add('dark-theme');
-            }
+      // --- COLOR THEME ---
+      window.changeTheme = function (color) {
+        bgColor = color;
+        document.documentElement.style.setProperty("--bg-color", color);
+        document.body.style.backgroundColor = color;
+        document.body.style.backgroundImage = `radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.1), transparent 40%), radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.1), transparent 40%)`;
+
+        // Check brightness to toggle dark text
+        const r = parseInt(color.substr(1, 2), 16);
+        const g = parseInt(color.substr(3, 2), 16);
+        const b = parseInt(color.substr(5, 2), 16);
+        const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+
+        if (yiq >= 128) {
+          document.body.classList.remove("dark-theme");
+        } else {
+          document.body.classList.add("dark-theme");
         }
+      };
 
-        // --- BUNDLE MODE ---
-        window.toggleBundleMode = function() {
-            const elig = tasks.filter(t => t.status !== 'Completed');
-            if(elig.length === 0) { showToast("Create tasks first! 🎯", true); return; }
-            bundleSelectionMode = !bundleSelectionMode; selectedForBundle = [];
-            if(bundleSelectionMode) { document.body.classList.add('selection-mode'); document.getElementById('bundle-bar').classList.remove('translate-y-full'); document.getElementById('fab-container').classList.add('hidden'); } 
-            else { document.body.classList.remove('selection-mode'); document.getElementById('bundle-bar').classList.add('translate-y-full'); document.getElementById('fab-container').classList.remove('hidden'); }
-            renderTasks();
+      // --- BUNDLE MODE ---
+      window.toggleBundleMode = function () {
+        const elig = tasks.filter((t) => t.status !== "Completed");
+        if (elig.length === 0) {
+          showToast("Create tasks first! 🎯", true);
+          return;
         }
-        window.toggleSelection = function(id) { if(selectedForBundle.includes(id)) selectedForBundle = selectedForBundle.filter(i => i !== id); else selectedForBundle.push(id); renderTasks(); }
-        window.finalizeBundleSelection = function() { if(selectedForBundle.length === 0) { showToast("Select tasks", true); return; } document.getElementById('bundle-name-modal').classList.remove('hidden'); }
-        window.deleteBundle = function(id) { if(!confirm("Delete quest?")) return; rewardBundles = rewardBundles.filter(b => b.id !== id); syncSettings(); renderUI(); }
+        bundleSelectionMode = !bundleSelectionMode;
+        selectedForBundle = [];
+        if (bundleSelectionMode) {
+          document.body.classList.add("selection-mode");
+          document
+            .getElementById("bundle-bar")
+            .classList.remove("translate-y-full");
+          document.getElementById("fab-container").classList.add("hidden");
+        } else {
+          document.body.classList.remove("selection-mode");
+          document
+            .getElementById("bundle-bar")
+            .classList.add("translate-y-full");
+          document.getElementById("fab-container").classList.remove("hidden");
+        }
+        renderTasks();
+      };
+      window.toggleSelection = function (id) {
+        if (selectedForBundle.includes(id))
+          selectedForBundle = selectedForBundle.filter((i) => i !== id);
+        else selectedForBundle.push(id);
+        renderTasks();
+      };
+      window.finalizeBundleSelection = function () {
+        if (selectedForBundle.length === 0) {
+          showToast("Select tasks", true);
+          return;
+        }
+        document.getElementById("bundle-name-modal").classList.remove("hidden");
+      };
+      window.deleteBundle = function (id) {
+        if (!confirm("Delete quest?")) return;
+        rewardBundles = rewardBundles.filter((b) => b.id !== id);
+        syncSettings();
+        renderUI();
+      };
 
-        // --- STANDARD UTILS ---
-        window.toggleAuthMode = function() { document.getElementById('login-form').classList.toggle('hidden'); document.getElementById('signup-form').classList.toggle('hidden'); }
-        window.togglePass = function(id) { const i = document.getElementById(id); i.type = i.type === 'password' ? 'text' : 'password'; }
-        window.logout = function() { localStorage.removeItem('growth_user'); location.reload(); }
-        window.showLoading = function(show) { document.getElementById('loading-overlay').classList.toggle('hidden', !show); }
-        window.showToast = function(msg, error = false) { const t = document.getElementById('toast'); document.getElementById('toast-message').innerText = msg; if(error) t.classList.add('bg-red-500'); else t.classList.remove('bg-red-500'); t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
-        
-        // --- MODAL UTILS ---
-        window.openSettings = function() { document.getElementById('settings-modal').classList.remove('hidden'); switchTab('profile'); }
-        window.closeSettings = function() { document.getElementById('settings-modal').classList.add('hidden'); }
-        window.switchTab = function(tab) {
-            ['subjects', 'categories', 'profile'].forEach(t => {
-                const btn = document.getElementById(`tab-${t}`); const content = document.getElementById(`content-${t}`);
-                if (t === tab) { 
-                    btn.classList.add('active');
-                    content.classList.remove('hidden'); 
-                } else { 
-                    btn.classList.remove('active');
-                    content.classList.add('hidden'); 
-                }
+      // --- STANDARD UTILS ---
+      window.toggleAuthMode = function () {
+        document.getElementById("login-form").classList.toggle("hidden");
+        document.getElementById("signup-form").classList.toggle("hidden");
+      };
+      window.togglePass = function (id) {
+        const i = document.getElementById(id);
+        i.type = i.type === "password" ? "text" : "password";
+      };
+      window.logout = function () {
+        localStorage.removeItem("growth_user");
+        location.reload();
+      };
+      window.showLoading = function (show) {
+        document
+          .getElementById("loading-overlay")
+          .classList.toggle("hidden", !show);
+      };
+      window.showToast = function (msg, error = false) {
+        const t = document.getElementById("toast");
+        document.getElementById("toast-message").innerText = msg;
+        if (error) t.classList.add("bg-red-500");
+        else t.classList.remove("bg-red-500");
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 3000);
+      };
+
+      // --- MODAL UTILS ---
+      window.openSettings = function () {
+        document.getElementById("settings-modal").classList.remove("hidden");
+        switchTab("profile");
+      };
+      window.closeSettings = function () {
+        document.getElementById("settings-modal").classList.add("hidden");
+      };
+      window.switchTab = function (tab) {
+        ["subjects", "categories", "profile"].forEach((t) => {
+          const btn = document.getElementById(`tab-${t}`);
+          const content = document.getElementById(`content-${t}`);
+          if (t === tab) {
+            btn.classList.add("active");
+            content.classList.remove("hidden");
+          } else {
+            btn.classList.remove("active");
+            content.classList.add("hidden");
+          }
+        });
+        if (tab === "subjects") renderSubjectsList();
+        if (tab === "categories") renderCategoriesList();
+        if (tab === "profile") {
+          document.getElementById("settings-name").value = currentUser
+            ? currentUser.name
+            : "";
+          document.getElementById("settings-color").value = bgColor;
+        }
+      };
+      window.openModal = function (mode, id) {
+        if (subjects.length === 0 || categories.length === 0) {
+          showToast("Add Subjects & Categories first!", true);
+          return;
+        }
+        const modal = document.getElementById("task-modal");
+        modal.classList.remove("hidden");
+        requestAnimationFrame(() => {
+          document
+            .getElementById("modal-content")
+            .classList.remove("scale-95", "opacity-0");
+          document
+            .getElementById("modal-content")
+            .classList.add("scale-100", "opacity-100");
+        });
+
+        const subSelect = document.getElementById("task-subject");
+        const catSelect = document.getElementById("task-category");
+        subSelect.innerHTML = subjects
+          .map((s) => `<option>${s}</option>`)
+          .join("");
+        catSelect.innerHTML = categories
+          .map((c) => `<option value="${c.name}">${c.name}</option>`)
+          .join("");
+
+        document.getElementById("task-form").reset();
+        const oldDel = document.getElementById("delete-btn");
+        if (oldDel) oldDel.remove();
+
+        if (mode === "create") {
+          document.getElementById("task-id").value = "";
+          document.getElementById("task-date").valueAsDate = new Date();
+          document.getElementById("modal-title").innerText = "New Task";
+        } else {
+          const t = tasks.find((x) => x.id === id);
+          document.getElementById("task-id").value = t.id;
+          document.getElementById("task-subject").value = t.subject;
+          document.getElementById("task-category").value = t.category;
+          document.getElementById("task-date").value = t.dueDate;
+          document.getElementById("task-notes").value = t.notes;
+          document.getElementById("task-link").value = t.link;
+          document.getElementById("modal-title").innerText = "Edit Task";
+
+          const delBtn = document.createElement("button");
+          delBtn.id = "delete-btn";
+          delBtn.type = "button";
+          delBtn.innerText = "Delete Task";
+          delBtn.className =
+            "w-full py-3 text-red-300 font-bold bg-red-500/10 rounded-xl border border-red-500/20 mt-3";
+          delBtn.onclick = () => {
+            openConfirm("Delete Task?", () => {
+              syncTask("delete", { id });
             });
-            if(tab === 'subjects') renderSubjectsList(); if(tab === 'categories') renderCategoriesList();
-            if(tab === 'profile') { document.getElementById('settings-name').value = currentUser ? currentUser.name : ''; document.getElementById('settings-color').value = bgColor; }
+          };
+          document.getElementById("modal-actions").appendChild(delBtn);
         }
-        window.openModal = function(mode, id) {
-            if(subjects.length === 0 || categories.length === 0) { showToast("Add Subjects & Categories first!", true); return; }
-            const modal = document.getElementById('task-modal'); modal.classList.remove('hidden');
-            requestAnimationFrame(() => { document.getElementById('modal-content').classList.remove('scale-95', 'opacity-0'); document.getElementById('modal-content').classList.add('scale-100', 'opacity-100'); });
-            
-            const subSelect = document.getElementById('task-subject'); const catSelect = document.getElementById('task-category');
-            subSelect.innerHTML = subjects.map(s => `<option>${s}</option>`).join('');
-            catSelect.innerHTML = categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+      };
+      window.closeModal = function () {
+        document
+          .getElementById("modal-content")
+          .classList.remove("scale-100", "opacity-100");
+        document
+          .getElementById("modal-content")
+          .classList.add("scale-95", "opacity-0");
+        setTimeout(
+          () => document.getElementById("task-modal").classList.add("hidden"),
+          300
+        );
+      };
+      window.handleFormSubmit = function (e) {
+        e.preventDefault();
+        closeModal();
+        const id =
+          document.getElementById("task-id").value || "task_" + Date.now();
+        const mode = document.getElementById("task-id").value
+          ? "update"
+          : "create";
+        const task = {
+          id,
+          subject: document.getElementById("task-subject").value,
+          category: document.getElementById("task-category").value,
+          dueDate: document.getElementById("task-date").value,
+          notes: document.getElementById("task-notes").value,
+          link: document.getElementById("task-link").value,
+          status: "Not Started",
+        };
+        if (mode === "update") {
+          const old = tasks.find((t) => t.id === id);
+          if (old) {
+            task.status = old.status;
+            task.completedAt = old.completedAt;
+          }
+        }
+        syncTask(mode, task);
+      };
 
-            document.getElementById('task-form').reset();
-            const oldDel = document.getElementById('delete-btn'); if(oldDel) oldDel.remove();
+      // --- RESET ---
+      window.openResetModal = function () {
+        document.getElementById("confirm-modal").classList.add("hidden");
+        document.getElementById("reset-modal").classList.remove("hidden");
+      };
+      window.closeResetModal = function () {
+        document.getElementById("reset-modal").classList.add("hidden");
+      };
+      window.confirmReset = function (type) {
+        closeResetModal();
+        openConfirm("Are you sure? Cannot undo.", () => {
+          if (type === "settings" || type === "all") {
+            subjects = [];
+            categories = [];
+            rewardBundles = [];
+          }
+          if (type === "game" || type === "all") {
+            xp = 0;
+            level = 1;
+            earnedBadges = [];
+            levelRewards = {};
+          }
+          syncSettings();
+          closeSettings();
+          renderUI();
+          showToast("Reset Complete 🗑️");
+        });
+      };
+      window.openConfirm = function (msg, action) {
+        document.getElementById("confirm-title").innerText = msg;
+        document.getElementById("confirm-modal").classList.remove("hidden");
+        document.getElementById("confirm-action-btn").onclick = () => {
+          action();
+          window.closeConfirm();
+        };
+      };
+      window.closeConfirm = function () {
+        document.getElementById("confirm-modal").classList.add("hidden");
+      };
 
-            if (mode === 'create') {
-                document.getElementById('task-id').value = ''; document.getElementById('task-date').valueAsDate = new Date(); document.getElementById('modal-title').innerText = "New Task";
-            } else {
-                const t = tasks.find(x => x.id === id);
-                document.getElementById('task-id').value = t.id; document.getElementById('task-subject').value = t.subject; document.getElementById('task-category').value = t.category;
-                document.getElementById('task-date').value = t.dueDate; document.getElementById('task-notes').value = t.notes; document.getElementById('task-link').value = t.link;
-                document.getElementById('modal-title').innerText = "Edit Task";
-                
-                const delBtn = document.createElement('button'); delBtn.id = 'delete-btn'; delBtn.type = 'button'; delBtn.innerText = "Delete Task";
-                delBtn.className = "w-full py-3 text-red-300 font-bold bg-red-500/10 rounded-xl border border-red-500/20 mt-3";
-                delBtn.onclick = () => { openConfirm("Delete Task?", () => { syncTask('delete', {id}); }); };
-                document.getElementById('modal-actions').appendChild(delBtn);
-            }
-        }
-        window.closeModal = function() { document.getElementById('modal-content').classList.remove('scale-100', 'opacity-100'); document.getElementById('modal-content').classList.add('scale-95', 'opacity-0'); setTimeout(() => document.getElementById('task-modal').classList.add('hidden'), 300); }
-        window.handleFormSubmit = function(e) {
-            e.preventDefault(); closeModal();
-            const id = document.getElementById('task-id').value || 'task_' + Date.now();
-            const mode = document.getElementById('task-id').value ? 'update' : 'create';
-            const task = {
-                id, subject: document.getElementById('task-subject').value, category: document.getElementById('task-category').value,
-                dueDate: document.getElementById('task-date').value, notes: document.getElementById('task-notes').value,
-                link: document.getElementById('task-link').value, status: 'Not Started'
-            };
-            if (mode === 'update') { const old = tasks.find(t => t.id === id); if (old) { task.status = old.status; task.completedAt = old.completedAt; } }
-            syncTask(mode, task);
-        }
+      // --- UI LOGIC ---
+      function renderUI() {
+        if (!currentUser) return;
 
-        // --- RESET ---
-        window.openResetModal = function() { document.getElementById('confirm-modal').classList.add('hidden'); document.getElementById('reset-modal').classList.remove('hidden'); }
-        window.closeResetModal = function() { document.getElementById('reset-modal').classList.add('hidden'); }
-        window.confirmReset = function(type) {
-            closeResetModal();
-            openConfirm("Are you sure? Cannot undo.", () => {
-                if(type === 'settings' || type === 'all') { subjects = []; categories = []; rewardBundles = []; }
-                if(type === 'game' || type === 'all') { xp = 0; level = 1; earnedBadges = []; levelRewards = {}; }
-                syncSettings(); closeSettings(); renderUI(); showToast("Reset Complete 🗑️");
-            });
-        }
-        window.openConfirm = function(msg, action) {
-            document.getElementById('confirm-title').innerText = msg;
-            document.getElementById('confirm-modal').classList.remove('hidden');
-            document.getElementById('confirm-action-btn').onclick = () => { action(); window.closeConfirm(); };
-        }
-        window.closeConfirm = function() { document.getElementById('confirm-modal').classList.add('hidden'); }
+        // --- FIX: Add Fallback Name ---
+        const name = currentUser.name || "Student";
+        document.getElementById("greeting").innerText = `Hi ${name}`;
 
-        // --- UI LOGIC ---
-        function renderUI() { 
-            if(!currentUser) return; 
-            
-            // --- FIX: Add Fallback Name ---
-            const name = currentUser.name || 'Student';
-            document.getElementById('greeting').innerText = `Hi ${name}`; 
-            
-            changeTheme(bgColor);
-            renderHeader(); 
-            renderBundles(); 
-            renderTasks(); 
-            renderRewardCard(); 
+        changeTheme(bgColor);
+        renderHeader();
+        renderBundles();
+        renderTasks();
+        renderRewardCard();
+      }
+      function renderHeader() {
+        document.getElementById("level-display").innerText = level;
+        document.getElementById("header-points").innerText = `${xp} XP`;
+        const circle = document.getElementById("level-circle");
+        const nextXp = Math.floor(100 * Math.pow(level, 1.5));
+        const currentBase =
+          level === 1 ? 0 : Math.floor(100 * Math.pow(level - 1, 1.5));
+        const percent = Math.min(
+          1,
+          Math.max(0, (xp - currentBase) / (nextXp - currentBase))
+        );
+        circle.style.strokeDashoffset = 126 - percent * 126;
+        document.getElementById("next-level-text").innerText = `Next: ${
+          nextXp - xp
+        } XP`;
+      }
+      function renderRewardCard() {
+        const card = document.getElementById("level-reward-card");
+        const nextLvl = level + 1;
+        const reward = levelRewards[nextLvl];
+        if (reward) {
+          card.classList.remove("hidden");
+          document.getElementById("level-reward-name").innerText = reward;
+          const nextXp = Math.floor(100 * Math.pow(level, 1.5));
+          const currentBase =
+            level === 1 ? 0 : Math.floor(100 * Math.pow(level - 1, 1.5));
+          const percent = ((xp - currentBase) / (nextXp - currentBase)) * 100;
+          document.getElementById(
+            "level-progress-bar"
+          ).style.width = `${percent}%`;
+          document.getElementById("xp-needed-text").innerText = `${
+            nextXp - xp
+          } XP to go`;
+        } else {
+          card.classList.add("hidden");
         }
-        function renderHeader() {
-            document.getElementById('level-display').innerText = level; document.getElementById('header-points').innerText = `${xp} XP`;
-            const circle = document.getElementById('level-circle'); const nextXp = Math.floor(100 * Math.pow(level, 1.5)); const currentBase = level === 1 ? 0 : Math.floor(100 * Math.pow(level - 1, 1.5));
-            const percent = Math.min(1, Math.max(0, (xp - currentBase) / (nextXp - currentBase))); circle.style.strokeDashoffset = 126 - (percent * 126);
-            document.getElementById('next-level-text').innerText = `Next: ${nextXp - xp} XP`;
-        }
-        function renderRewardCard() {
-            const card = document.getElementById('level-reward-card'); const nextLvl = level + 1; const reward = levelRewards[nextLvl];
-            if (reward) {
-                card.classList.remove('hidden'); document.getElementById('level-reward-name').innerText = reward;
-                const nextXp = Math.floor(100 * Math.pow(level, 1.5)); const currentBase = level === 1 ? 0 : Math.floor(100 * Math.pow(level - 1, 1.5));
-                const percent = ((xp - currentBase) / (nextXp - currentBase)) * 100;
-                document.getElementById('level-progress-bar').style.width = `${percent}%`; document.getElementById('xp-needed-text').innerText = `${nextXp - xp} XP to go`;
-            } else { card.classList.add('hidden'); }
-        }
-        function renderBundles() {
-            const container = document.getElementById('quest-container'); container.innerHTML = '';
-            rewardBundles.filter(b => !b.completed).forEach(b => {
-                const total = b.taskIds.length;
-                const done = b.taskIds.filter(id => tasks.find(t => t.id === id && t.status === 'Completed')).length;
-                container.innerHTML += `
+      }
+      function renderBundles() {
+        const container = document.getElementById("quest-container");
+        container.innerHTML = "";
+        rewardBundles
+          .filter((b) => !b.completed)
+          .forEach((b) => {
+            const total = b.taskIds.length;
+            const done = b.taskIds.filter((id) =>
+              tasks.find((t) => t.id === id && t.status === "Completed")
+            ).length;
+            container.innerHTML += `
                     <div class="glass-panel p-4 rounded-2xl border-l-4 border-yellow-400 relative overflow-hidden group">
-                        <button onclick="deleteBundle(${b.id})" class="absolute top-2 right-2 text-zinc-500 hover:text-red-400 z-20"><i class="ph-bold ph-trash"></i></button>
+                        <button onclick="deleteBundle(${
+                          b.id
+                        })" class="absolute top-2 right-2 text-zinc-500 hover:text-red-400 z-20"><i class="ph-bold ph-trash"></i></button>
                         <i class="ph-duotone ph-gift absolute -right-2 -bottom-2 text-6xl text-white/5"></i>
-                        <div class="relative z-10"><h3 class="font-bold text-dynamic-main text-sm mb-1">Quest: ${b.name}</h3><div class="w-full bg-black/10 rounded-full h-1.5"><div class="bg-yellow-400 h-1.5 rounded-full transition-all" style="width:${(done/total)*100}%"></div></div><p class="text-[10px] text-dynamic-muted mt-1 text-right">${done}/${total} tasks</p></div>
+                        <div class="relative z-10"><h3 class="font-bold text-dynamic-main text-sm mb-1">Quest: ${
+                          b.name
+                        }</h3><div class="w-full bg-black/10 rounded-full h-1.5"><div class="bg-yellow-400 h-1.5 rounded-full transition-all" style="width:${
+              (done / total) * 100
+            }%"></div></div><p class="text-[10px] text-dynamic-muted mt-1 text-right">${done}/${total} tasks</p></div>
                     </div>`;
-            });
+          });
+      }
+      function renderTasks() {
+        const list = document.getElementById("task-list");
+        list.innerHTML = "";
+
+        // --- FIX: Handle Empty Tasks Gracefully ---
+        if (!tasks || tasks.length === 0) {
+          document.getElementById("empty-state").classList.remove("hidden");
+          return;
         }
-        function renderTasks() {
-            const list = document.getElementById('task-list'); list.innerHTML = '';
-            
-            // --- FIX: Handle Empty Tasks Gracefully ---
-            if (!tasks || tasks.length === 0) { 
-                document.getElementById('empty-state').classList.remove('hidden'); 
-                return; 
-            }
-            
-            document.getElementById('empty-state').classList.add('hidden');
-            tasks.forEach(task => {
-                const isDone = task.status === 'Completed';
-                const catInfo = categories.find(c => c.name === task.category);
-                const pts = catInfo ? catInfo.points : 10;
-                const card = document.createElement('div');
-                card.className = `glass-panel p-5 rounded-3xl relative transition-all duration-300 ${isDone ? 'opacity-50 grayscale' : 'hover:-translate-y-1'}`;
-                
-                if(bundleSelectionMode) {
-                    const isSelected = selectedForBundle.includes(task.id);
-                    card.className = `glass-panel p-5 rounded-3xl relative transition-all border border-transparent ${isSelected ? 'border-yellow-400 bg-yellow-400/10' : ''}`;
-                    card.onclick = () => { toggleSelection(task.id); renderTasks(); };
-                    card.innerHTML = `<div class="flex items-center gap-4 pointer-events-none"><div class="w-6 h-6 rounded-full border border-zinc-500 flex items-center justify-center ${isSelected ? 'bg-yellow-400 border-yellow-400 text-black' : ''}">${isSelected ? '<i class="ph-bold ph-check"></i>' : ''}</div><div><h3 class="font-bold text-dynamic-main">${task.subject}</h3><p class="text-xs text-dynamic-muted">${task.category}</p></div></div>`;
-                } else {
-                    card.innerHTML = `
+
+        document.getElementById("empty-state").classList.add("hidden");
+        tasks.forEach((task) => {
+          const isDone = task.status === "Completed";
+          const catInfo = categories.find((c) => c.name === task.category);
+          const pts = catInfo ? catInfo.points : 10;
+          const card = document.createElement("div");
+          card.className = `glass-panel p-5 rounded-3xl relative transition-all duration-300 ${
+            isDone ? "opacity-50 grayscale" : "hover:-translate-y-1"
+          }`;
+
+          if (bundleSelectionMode) {
+            const isSelected = selectedForBundle.includes(task.id);
+            card.className = `glass-panel p-5 rounded-3xl relative transition-all border border-transparent ${
+              isSelected ? "border-yellow-400 bg-yellow-400/10" : ""
+            }`;
+            card.onclick = () => {
+              toggleSelection(task.id);
+              renderTasks();
+            };
+            card.innerHTML = `<div class="flex items-center gap-4 pointer-events-none"><div class="w-6 h-6 rounded-full border border-zinc-500 flex items-center justify-center ${
+              isSelected ? "bg-yellow-400 border-yellow-400 text-black" : ""
+            }">${
+              isSelected ? '<i class="ph-bold ph-check"></i>' : ""
+            }</div><div><h3 class="font-bold text-dynamic-main">${
+              task.subject
+            }</h3><p class="text-xs text-dynamic-muted">${
+              task.category
+            }</p></div></div>`;
+          } else {
+            card.innerHTML = `
                         <div class="flex gap-4">
-                            <label class="relative flex items-center p-3 rounded-full cursor-pointer"><input type="checkbox" data-id="${task.id}" class="w-6 h-6 border border-zinc-500 rounded-full custom-check transition-all" ${isDone ? 'checked' : ''} onchange="toggleTask('${task.id}')"></label>
-                            <div class="flex-1 py-1" onclick="openModal('update', '${task.id}')">
-                                <div class="flex justify-between items-start"><h3 class="font-bold text-lg leading-tight ${isDone ? 'line-through text-dynamic-muted' : 'text-dynamic-main'}">${task.subject}</h3><span class="text-[10px] font-bold bg-black/5 px-2 py-1 rounded-lg text-pink-400 border border-dynamic">${task.category} (+${pts})</span></div>
-                                <p class="text-sm text-dynamic-muted mt-1 line-clamp-1">${task.notes || 'No details'}</p>
-                                <div class="mt-3 flex gap-3 text-xs font-bold text-dynamic-muted"><span class="flex items-center gap-1 ${isDone ? '' : 'text-yellow-500'}"><i class="ph-bold ph-calendar"></i> ${new Date(task.dueDate).toLocaleDateString()}</span></div>
+                            <label class="relative flex items-center p-3 rounded-full cursor-pointer"><input type="checkbox" data-id="${
+                              task.id
+                            }" class="w-6 h-6 border border-zinc-500 rounded-full custom-check transition-all" ${
+              isDone ? "checked" : ""
+            } onchange="toggleTask('${task.id}')"></label>
+                            <div class="flex-1 py-1" onclick="openModal('update', '${
+                              task.id
+                            }')">
+                                <div class="flex justify-between items-start"><h3 class="font-bold text-lg leading-tight ${
+                                  isDone
+                                    ? "line-through text-dynamic-muted"
+                                    : "text-dynamic-main"
+                                }">${
+              task.subject
+            }</h3><span class="text-[10px] font-bold bg-black/5 px-2 py-1 rounded-lg text-pink-400 border border-dynamic">${
+              task.category
+            } (+${pts})</span></div>
+                                <p class="text-sm text-dynamic-muted mt-1 line-clamp-1">${
+                                  task.notes || "No details"
+                                }</p>
+                                <div class="mt-3 flex gap-3 text-xs font-bold text-dynamic-muted"><span class="flex items-center gap-1 ${
+                                  isDone ? "" : "text-yellow-500"
+                                }"><i class="ph-bold ph-calendar"></i> ${new Date(
+              task.dueDate
+            ).toLocaleDateString()}</span></div>
                             </div>
                         </div>`;
-                }
-                list.appendChild(card);
-            });
-        }
-        
-        // ... (rest of standard functions) ...
-        function autoCleanup() {
-             // Optional: logic to remove old tasks
-        }
-        function calculateLevel() {
-            // Recalculate level based on XP logic
-            const currentXp = xp;
-            // Simple formula: Level N requires N^1.5 * 100 XP
-            // Reverse: Level = (XP / 100)^(1/1.5)
-            // But since we increment manually, we can just check if we passed the threshold
-            // For now, assume level is stored/synced, or recalculate:
-            let l = 1;
-            while (currentXp >= Math.floor(100 * Math.pow(l, 1.5))) {
-                l++;
-            }
-            if(l > level) { 
-                level = l; 
-                document.getElementById('levelup-level-display').innerText = level;
-                const r = levelRewards[level] || "Mystery Reward";
-                document.getElementById('levelup-reward-name').innerText = r;
-                document.getElementById('levelup-modal').classList.remove('hidden');
-            }
-            level = l;
-            renderHeader();
-        }
-        function claimReward() {
-            document.getElementById('levelup-modal').classList.add('hidden');
-        }
-        function checkManualBadges(task) {
-            // Logic to check badges like Early Bird, etc.
-        }
-        function checkBundles() {
-            rewardBundles.forEach(b => {
-                if(b.completed) return;
-                const allDone = b.taskIds.every(id => {
-                    const t = tasks.find(x => x.id === id);
-                    return t && t.status === 'Completed';
-                });
-                if(allDone) {
-                    b.completed = true;
-                    document.getElementById('celebration-reward-name').innerText = b.name;
-                    document.getElementById('celebration-modal').classList.remove('hidden');
-                    syncSettings();
-                }
-            });
-        }
-        
-        function toggleTask(id) {
-            if(bundleSelectionMode) return;
-            const task = tasks.find(t => t.id === id); if(!task) return;
-            const newStatus = task.status === 'Completed' ? 'Not Started' : 'Completed';
-            task.status = newStatus;
-            
-            const checkbox = document.querySelector(`input[data-id="${id}"]`);
-            if (newStatus === 'Completed') {
-                task.completedAt = new Date().toISOString();
-                const cat = categories.find(c => c.name === task.category);
-                const pts = cat ? parseInt(cat.points) : 10;
-                xp += pts;
-                if(checkbox) {
-                    const rect = checkbox.getBoundingClientRect();
-                    const headerRect = document.getElementById('level-circle').getBoundingClientRect();
-                    const flyEl = document.createElement('div'); flyEl.className = 'xp-fly'; flyEl.innerText = `+${pts} XP`;
-                    flyEl.style.left = `${rect.left}px`; flyEl.style.top = `${rect.top}px`;
-                    flyEl.style.setProperty('--dx', `${headerRect.left - rect.left}px`); flyEl.style.setProperty('--dy', `${headerRect.top - rect.top}px`);
-                    document.body.appendChild(flyEl); setTimeout(() => flyEl.remove(), 1000);
-                }
-                showToast(PRAISE[Math.floor(Math.random() * PRAISE.length)]);
-                checkManualBadges(task); checkBundles();
-            } else {
-                const cat = categories.find(c => c.name === task.category);
-                xp = Math.max(0, xp - (cat ? parseInt(cat.points) : 10));
-                delete task.completedAt;
-            }
-            syncTask('update', task); syncSettings(); calculateLevel();
-        }
+          }
+          list.appendChild(card);
+        });
+      }
 
-        // --- RENDER HELPERS ---
-        function renderSubjectsList() { document.getElementById('subjects-list').innerHTML = subjects.map((s, i) => `<div class="flex justify-between items-center bg-black/5 p-3 rounded-xl border border-dynamic group mb-2"><input type="text" value="${s}" onchange="updateSubject(${i}, this.value)" class="bg-transparent text-sm font-medium text-dynamic-main focus:outline-none w-full border-b border-transparent focus:border-pink-300 transition-colors"><button onclick="removeSubject(${i})" class="text-zinc-600 hover:text-red-400 transition-colors"><i class="ph-bold ph-trash"></i></button></div>`).join(''); }
-        window.updateSubject = function(idx, val) { if(val.trim()) { subjects[idx] = val.trim(); syncSettings(); } }
-        window.addSubject = function() { const input = document.getElementById('new-subject-input'); if (input.value.trim()) { subjects.push(input.value.trim()); input.value = ''; syncSettings(); renderSubjectsList(); } }
-        window.removeSubject = function(idx) { subjects.splice(idx, 1); syncSettings(); renderSubjectsList(); }
-        function renderCategoriesList() { document.getElementById('categories-list').innerHTML = categories.map((c, i) => `<div class="flex items-center gap-2 bg-black/5 p-3 rounded-xl border border-dynamic mb-2"><input type="text" value="${c.name}" onchange="updateCatName(${i}, this.value)" class="flex-[2] bg-transparent text-sm font-bold text-dynamic-main focus:outline-none border-b border-transparent focus:border-pink-300 min-w-0"><input type="number" value="${c.points}" onchange="updateCatPoints(${i}, this.value)" class="flex-1 w-16 bg-transparent text-xs text-yellow-500 font-bold text-right focus:outline-none border-b border-transparent focus:border-yellow-300"><span class="text-[10px] text-dynamic-muted mr-2">XP</span><button onclick="removeCategory(${i})" class="text-zinc-600 hover:text-red-400 shrink-0"><i class="ph-bold ph-trash"></i></button></div>`).join(''); }
-        window.updateCatName = function(idx, val) { if(val.trim()) { categories[idx].name = val.trim(); syncSettings(); } }
-        window.updateCatPoints = function(idx, val) { if(val) { categories[idx].points = parseInt(val); syncSettings(); } }
-        window.addCategory = function() { const nameIn = document.getElementById('new-cat-name'); const ptsIn = document.getElementById('new-cat-points'); if (nameIn.value && ptsIn.value) { categories.push({ name: nameIn.value.trim(), points: parseInt(ptsIn.value) }); nameIn.value = ''; syncSettings(); renderCategoriesList(); } }
-        window.removeCategory = function(idx) { categories.splice(idx, 1); syncSettings(); renderCategoriesList(); }
+      // ... (rest of standard functions) ...
+      function autoCleanup() {
+        // Optional: logic to remove old tasks
+      }
+      function calculateLevel() {
+        // Recalculate level based on XP logic
+        const currentXp = xp;
+        // Simple formula: Level N requires N^1.5 * 100 XP
+        // Reverse: Level = (XP / 100)^(1/1.5)
+        // But since we increment manually, we can just check if we passed the threshold
+        // For now, assume level is stored/synced, or recalculate:
+        let l = 1;
+        while (currentXp >= Math.floor(100 * Math.pow(l, 1.5))) {
+          l++;
+        }
+        if (l > level) {
+          level = l;
+          document.getElementById("levelup-level-display").innerText = level;
+          const r = levelRewards[level] || "Mystery Reward";
+          document.getElementById("levelup-reward-name").innerText = r;
+          document.getElementById("levelup-modal").classList.remove("hidden");
+        }
+        level = l;
+        renderHeader();
+      }
+      function claimReward() {
+        document.getElementById("levelup-modal").classList.add("hidden");
+      }
+      function checkManualBadges(task) {
+        // Logic to check badges like Early Bird, etc.
+      }
+      function checkBundles() {
+        rewardBundles.forEach((b) => {
+          if (b.completed) return;
+          const allDone = b.taskIds.every((id) => {
+            const t = tasks.find((x) => x.id === id);
+            return t && t.status === "Completed";
+          });
+          if (allDone) {
+            b.completed = true;
+            document.getElementById("celebration-reward-name").innerText =
+              b.name;
+            document
+              .getElementById("celebration-modal")
+              .classList.remove("hidden");
+            syncSettings();
+          }
+        });
+      }
+
+      function toggleTask(id) {
+        if (bundleSelectionMode) return;
+        const task = tasks.find((t) => t.id === id);
+        if (!task) return;
+        const newStatus =
+          task.status === "Completed" ? "Not Started" : "Completed";
+        task.status = newStatus;
+
+        const checkbox = document.querySelector(`input[data-id="${id}"]`);
+        if (newStatus === "Completed") {
+          task.completedAt = new Date().toISOString();
+          const cat = categories.find((c) => c.name === task.category);
+          const pts = cat ? parseInt(cat.points) : 10;
+          xp += pts;
+          if (checkbox) {
+            const rect = checkbox.getBoundingClientRect();
+            const headerRect = document
+              .getElementById("level-circle")
+              .getBoundingClientRect();
+            const flyEl = document.createElement("div");
+            flyEl.className = "xp-fly";
+            flyEl.innerText = `+${pts} XP`;
+            flyEl.style.left = `${rect.left}px`;
+            flyEl.style.top = `${rect.top}px`;
+            flyEl.style.setProperty("--dx", `${headerRect.left - rect.left}px`);
+            flyEl.style.setProperty("--dy", `${headerRect.top - rect.top}px`);
+            document.body.appendChild(flyEl);
+            setTimeout(() => flyEl.remove(), 1000);
+          }
+          showToast(PRAISE[Math.floor(Math.random() * PRAISE.length)]);
+          checkManualBadges(task);
+          checkBundles();
+        } else {
+          const cat = categories.find((c) => c.name === task.category);
+          xp = Math.max(0, xp - (cat ? parseInt(cat.points) : 10));
+          delete task.completedAt;
+        }
+        syncTask("update", task);
+        syncSettings();
+        calculateLevel();
+      }
+
+      // --- RENDER HELPERS ---
+      function renderSubjectsList() {
+        document.getElementById("subjects-list").innerHTML = subjects
+          .map(
+            (s, i) => `
+        <div class="flex justify-between items-center bg-black/5 p-3 rounded-xl border border-dynamic group mb-2">
+            <input type="text" value="${s}" onchange="updateSubject(${i}, this.value)" class="bg-transparent text-sm font-medium text-zinc-900 focus:outline-none w-full border-b border-transparent focus:border-pink-300 transition-colors">
+            <button onclick="removeSubject(${i})" class="text-zinc-600 hover:text-red-400 transition-colors"><i class="ph-bold ph-trash"></i></button>
+        </div>`
+          )
+          .join("");
+      }
+      window.updateSubject = function (idx, val) {
+        if (val.trim()) {
+          subjects[idx] = val.trim();
+          syncSettings();
+        }
+      };
+      window.addSubject = function () {
+        const input = document.getElementById("new-subject-input");
+        if (input.value.trim()) {
+          subjects.push(input.value.trim());
+          input.value = "";
+          syncSettings();
+          renderSubjectsList();
+        }
+      };
+      window.removeSubject = function (idx) {
+        subjects.splice(idx, 1);
+        syncSettings();
+        renderSubjectsList();
+      };
+      function renderCategoriesList() {
+        document.getElementById("categories-list").innerHTML = categories
+          .map(
+            (c, i) => `
+        <div class="flex items-center gap-2 bg-black/5 p-3 rounded-xl border border-dynamic mb-2">
+            <input type="text" value="${c.name}" onchange="updateCatName(${i}, this.value)" class="flex-[2] bg-transparent text-sm font-bold text-zinc-900 focus:outline-none border-b border-transparent focus:border-pink-300 min-w-0">
+            <input type="number" value="${c.points}" onchange="updateCatPoints(${i}, this.value)" class="flex-1 w-16 bg-transparent text-xs text-yellow-600 font-bold text-right focus:outline-none border-b border-transparent focus:border-yellow-300">
+            <span class="text-[10px] text-zinc-500 mr-2">XP</span>
+            <button onclick="removeCategory(${i})" class="text-zinc-600 hover:text-red-400 shrink-0"><i class="ph-bold ph-trash"></i></button>
+        </div>`
+          )
+          .join("");
+      }
+      window.updateCatName = function (idx, val) {
+        if (val.trim()) {
+          categories[idx].name = val.trim();
+          syncSettings();
+        }
+      };
+      window.updateCatPoints = function (idx, val) {
+        if (val) {
+          categories[idx].points = parseInt(val);
+          syncSettings();
+        }
+      };
+      window.addCategory = function () {
+        const nameIn = document.getElementById("new-cat-name");
+        const ptsIn = document.getElementById("new-cat-points");
+        if (nameIn.value && ptsIn.value) {
+          categories.push({
+            name: nameIn.value.trim(),
+            points: parseInt(ptsIn.value),
+          });
+          nameIn.value = "";
+          syncSettings();
+          renderCategoriesList();
+        }
+      };
+      window.removeCategory = function (idx) {
+        categories.splice(idx, 1);
+        syncSettings();
+        renderCategoriesList();
+      };
     </script>
-</body>
+  </body>
 </html>
