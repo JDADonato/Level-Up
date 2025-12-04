@@ -1,0 +1,21 @@
+{
+  "name": "Growth Tasks",
+  "short_name": "Growth",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#18181b",
+  "theme_color": "#fbcfe8",
+  "description": "Premium Student Task Manager",
+  "icons": [
+    {
+      "src": "task_logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "task_logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
