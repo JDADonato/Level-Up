@@ -353,9 +353,7 @@ window.confirmBatchDelete = function() {
         let deletedCount = 0;
 
         // Loop through all selected task IDs and send delete request for each
-        // Using a sequential loop for safety, though concurrency is possible here.
         for (const taskId of selectedForDelete) {
-            // Find the task object to pass to syncTask('delete')
             const taskToDelete = tasks.find(t => t.id === taskId);
             if (taskToDelete) {
                 // syncTask deletes from local state, updates UI, and calls API
@@ -366,7 +364,6 @@ window.confirmBatchDelete = function() {
         
         // Final state update and toast
         selectedForDelete = [];
-        // Important: Wait for all syncs to complete before toggling the mode off
         toggleDeleteMode(false); 
         showLoading(false);
         showToast(`Successfully deleted ${deletedCount} tasks! 🗑️`);
@@ -985,50 +982,79 @@ function renderTasks() {
             </div>`;
             
         // --- LONG PRESS LISTENERS (ONLY IN NORMAL MODE) ---
-        // Start Timer (Long Press Handler)
+        
+        // 1. Logic for handling the timer and mode activation
         const startLongPress = (e) => {
-            if (e.button === 2 || deleteSelectionMode || bundleSelectionMode) return; // Ignore right-click, ignore if mode active
+            if (e.button === 2 || deleteSelectionMode || bundleSelectionMode) return;
             
-            // Clear any previous timer in case of rapid events
             if (longPressTimer) clearTimeout(longPressTimer);
+            
+            // Set a flag to track if the timer was started
+            card.dataset.longPressStarted = 'true';
 
             longPressTimer = setTimeout(() => {
-                // Prevent task opening modal immediately after long press
-                e.stopPropagation(); 
+                // SUCCESS: Long press detected
                 toggleDeleteMode(true);
                 toggleDeleteSelection(task.id);
-            }, 700); // 700ms threshold
+                // Clear the timer and reset the flag immediately after mode change
+                clearTimeout(longPressTimer);
+                card.dataset.longPressStarted = 'false';
+                longPressTimer = null;
+            }, 700);
         };
 
-        // Clear Timer
         const clearLongPress = () => {
-            clearTimeout(longPressTimer);
-            longPressTimer = null;
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+            // Reset the flag regardless of whether long press completed
+            card.dataset.longPressStarted = 'false'; 
         };
         
-        // Prevent default click behavior if long press starts
-        const clickHandler = (e) => {
-            if (longPressTimer) {
-                // If a timer was set, it means the user attempted a long press (even if time was too short).
-                // We stop the default click action to prevent the task modal from opening.
-                e.stopPropagation();
-            }
-        };
-
-        // Desktop Events
-        card.addEventListener('mousedown', startLongPress);
-        card.addEventListener('mouseup', clearLongPress);
-        card.addEventListener('mouseleave', clearLongPress); // If mouse leaves element
-        card.addEventListener('click', clickHandler, true); // Capture phase to prevent bubbling
-
-        // Mobile Events
+        // 2. Mobile/Touch event handling
         card.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Prevent default mobile behavior like scrolling/context menu
+            // Prevent default touch behavior to allow long press (needs passive: false)
+            e.preventDefault(); 
             startLongPress(e);
         }, { passive: false });
-        card.addEventListener('touchend', clearLongPress);
+        
+        card.addEventListener('touchend', (e) => {
+            if (longPressTimer) {
+                // If timer was running, it was a quick tap.
+                clearLongPress();
+                
+                // --- FIX FOR MOBILE: EXPLICITLY TRIGGER THE TOGGLE TASK ---
+                // We call toggleTask directly on a quick touchend to bypass the suppressed native click event.
+                toggleTask(task.id); 
+                e.stopPropagation();
+            }
+        });
+        
         card.addEventListener('touchcancel', clearLongPress);
-            
+        
+        // 3. Desktop events (kept simpler as mobile is the issue)
+        card.addEventListener('mousedown', startLongPress);
+        card.addEventListener('mouseup', clearLongPress);
+        card.addEventListener('mouseleave', clearLongPress);
+
+        // Prevent the task modal from opening if long press was attempted
+        const openModalDiv = card.querySelector('div.flex-1');
+        if (openModalDiv) {
+            openModalDiv.onclick = (e) => {
+                if (card.dataset.longPressStarted === 'true') {
+                    // This means a quick tap occurred, which already triggered toggleTask in touchend.
+                    e.stopPropagation();
+                    card.dataset.longPressStarted = 'false'; 
+                } else {
+                    // Default behavior: open modal
+                    window.openModal('update', task.id); 
+                }
+            };
+        }
+        
+        // Ensure the checkbox still works (it already calls toggleTask via onchange)
+        
         list.appendChild(card);
     });
 }
