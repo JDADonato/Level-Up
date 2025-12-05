@@ -12,7 +12,10 @@ let levelRewards = {};
 let earnedBadges = [];
 let rewardBundles = []; 
 let bundleSelectionMode = false;
+let deleteSelectionMode = false; // <-- NEW STATE
 let selectedForBundle = [];
+let selectedForDelete = []; // <-- NEW ARRAY
+let longPressTimer = null; // <-- NEW TIMER FOR LONG PRESS
 let bgColor = "#fef08a"; // Default Pastel Yellow
 let badgeDebounceTimer = null; // Timer for misclick prevention
 
@@ -179,6 +182,199 @@ window.saveBundle = function() {
     toggleBundleMode(); renderUI(); showToast("Quest Created! ⚔️");
 }
 
+// --- NEW IMPORT LOGIC ---
+
+// Helper function to convert file to base64 string
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]); // Only send base64 data
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+    });
+}
+
+window.openImportModal = function() {
+    document.getElementById('import-modal').classList.remove('hidden');
+    document.getElementById('import-error-msg').innerText = '';
+    const fileInput = document.getElementById('task-import-file');
+    fileInput.value = ''; // Reset file input
+}
+window.closeImportModal = function() {
+    document.getElementById('import-modal').classList.add('hidden');
+}
+
+window.startTaskImport = async function() {
+    if (!currentUser) { showToast("Please log in first.", true); return; }
+
+    const fileInput = document.getElementById('task-import-file');
+    const file = fileInput.files[0];
+    
+    // 1. FRONTEND VALIDATION: Check for file presence and show toast
+    if (!file) { 
+        showToast("Please attach a CSV or TSV file first.", true); 
+        return; 
+    }
+    
+    showLoading(true);
+    document.getElementById('import-error-msg').innerText = '';
+    
+    try {
+        const base64Data = await fileToBase64(file);
+        const fileName = file.name;
+
+        const payload = {
+            action: 'import_tasks',
+            userId: currentUser.userId,
+            data: base64Data,
+            fileName: fileName
+        };
+
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const json = await res.json();
+
+        if (json.status === 'success') {
+            closeImportModal();
+            
+            // CONGRATULATIONS: Trigger Confetti Animation for Success
+            triggerConfetti();
+
+            // Automatically fetch the new data and settings after successful import
+            await fetchUserData(); 
+            
+            // --- FIX: Show the detailed message from the server ---
+            let successMessage = json.message;
+
+            if (successMessage.includes('duplicates skipped')) {
+                // If duplicates were skipped, show the full detailed message
+                showToast(successMessage);
+            } else if (successMessage.includes('IMPORTANT:')) {
+                // If only new categories were added
+                showToast("Import successful! Settings updated. ⚙️");
+                showToast("New categories added! Please set XP in Settings. ⚙️", true);
+            } else {
+                // Standard success message
+                showToast(successMessage);
+            }
+        } else {
+            // 2. ERROR HANDLING: Check for specific format errors from the backend
+            let errorMessage = json.message;
+            
+            if (errorMessage.includes('Missing required columns')) {
+                // Specific error for missing headers
+                showToast("File format error! Check column headers.", true);
+                document.getElementById('import-error-msg').innerText = errorMessage;
+            } else if (errorMessage.includes('File is empty')) {
+                // Specific error for empty file/headers only
+                 showToast("The file is empty or missing data rows.", true);
+                 document.getElementById('import-error-msg').innerText = errorMessage;
+            } else {
+                // General import failure
+                document.getElementById('import-error-msg').innerText = `Import failed: ${errorMessage}`;
+                showToast("Import failed. Check error message.", true);
+            }
+        }
+
+    } catch (e) {
+        document.getElementById('import-error-msg').innerText = `Error processing file: ${e.message}`;
+        showToast("File error. Please try again.", true);
+    } finally {
+        showLoading(false);
+    }
+}
+
+// --- NEW CONFETTI TRIGGER FUNCTION ---
+function triggerConfetti() {
+    const duration = 2000;
+    const end = Date.now() + duration;
+
+    (function frame() {
+        // Launch confetti from center top
+        confetti({
+            particleCount: 50,
+            spread: 90,
+            origin: { x: 0.5, y: 0.2 },
+            colors: ['#fcd34d', '#f472b6', '#ffffff'] 
+        });
+
+        if (Date.now() < end) {
+            requestAnimationFrame(frame);
+        }
+    }());
+}
+// --- END NEW CONFETTI TRIGGER FUNCTION ---
+
+// --- BATCH DELETE LOGIC (NEW FEATURE) ---
+window.toggleDeleteMode = function(enable) {
+    if (enable === undefined) {
+        deleteSelectionMode = !deleteSelectionMode;
+    } else {
+        deleteSelectionMode = enable;
+    }
+
+    selectedForDelete = [];
+    
+    if (deleteSelectionMode) {
+        document.body.classList.add('delete-mode');
+        document.getElementById('delete-bar').classList.remove('translate-y-full');
+        document.getElementById('fab-container').classList.add('hidden'); 
+        document.body.classList.remove('selection-mode'); // Ensure bundle mode is off
+        bundleSelectionMode = false; 
+    } else {
+        document.body.classList.remove('delete-mode');
+        document.getElementById('delete-bar').classList.add('translate-y-full');
+        document.getElementById('fab-container').classList.remove('hidden'); 
+    }
+    renderDeleteBar();
+    renderTasks();
+}
+
+function toggleDeleteSelection(id) {
+    if (selectedForDelete.includes(id)) {
+        selectedForDelete = selectedForDelete.filter(i => i !== id);
+    } else {
+        selectedForDelete.push(id);
+    }
+    renderDeleteBar();
+    renderTasks();
+}
+
+function renderDeleteBar() {
+    const count = selectedForDelete.length;
+    document.getElementById('delete-count').innerText = `${count} task${count === 1 ? '' : 's'} selected`;
+    document.getElementById('btn-batch-delete').disabled = count === 0;
+}
+
+window.confirmBatchDelete = function() {
+    if (selectedForDelete.length === 0) return;
+
+    openConfirm(`Permanently delete ${selectedForDelete.length} tasks?`, async () => {
+        showLoading(true);
+        let deletedCount = 0;
+
+        // Loop through all selected task IDs and send delete request for each
+        // Using a sequential loop for safety, though concurrency is possible here.
+        for (const taskId of selectedForDelete) {
+            // Find the task object to pass to syncTask('delete')
+            const taskToDelete = tasks.find(t => t.id === taskId);
+            if (taskToDelete) {
+                // syncTask deletes from local state, updates UI, and calls API
+                await syncTask('delete', { id: taskId }); 
+                deletedCount++;
+            }
+        }
+        
+        // Final state update and toast
+        selectedForDelete = [];
+        // Important: Wait for all syncs to complete before toggling the mode off
+        toggleDeleteMode(false); 
+        showLoading(false);
+        showToast(`Successfully deleted ${deletedCount} tasks! 🗑️`);
+    });
+}
+// --- END BATCH DELETE LOGIC ---
+
+
 // --- HELPER FUNCTIONS ---
 function applySettings(s) {
     if (s.subjects && Array.isArray(s.subjects)) subjects = s.subjects; 
@@ -258,11 +454,21 @@ window.changeTheme = function(color) {
 
 // --- BUNDLE MODE ---
 window.toggleBundleMode = function() {
+    if (deleteSelectionMode) return; // Prevent mixing modes
+
     const elig = tasks.filter(t => t.status !== 'Completed');
     if(elig.length === 0) { showToast("Create tasks first! 🎯", true); return; }
     bundleSelectionMode = !bundleSelectionMode; selectedForBundle = [];
-    if(bundleSelectionMode) { document.body.classList.add('selection-mode'); document.getElementById('bundle-bar').classList.remove('translate-y-full'); document.getElementById('fab-container').classList.add('hidden'); } 
-    else { document.body.classList.remove('selection-mode'); document.getElementById('bundle-bar').classList.add('translate-y-full'); document.getElementById('fab-container').classList.remove('hidden'); }
+    if(bundleSelectionMode) { 
+        document.body.classList.add('selection-mode'); 
+        document.getElementById('bundle-bar').classList.remove('translate-y-full'); 
+        document.getElementById('fab-container').classList.add('hidden'); 
+    } 
+    else { 
+        document.body.classList.remove('selection-mode'); 
+        document.getElementById('bundle-bar').classList.add('translate-y-full'); 
+        document.getElementById('fab-container').classList.remove('hidden'); 
+    }
     renderTasks();
 }
 window.toggleSelection = function(id) { if(selectedForBundle.includes(id)) selectedForBundle = selectedForBundle.filter(i => i !== id); else selectedForBundle.push(id); renderTasks(); }
@@ -521,7 +727,8 @@ function checkBundles() {
 // --- TASK LOGIC ---
 
 function toggleTask(id) {
-    if(bundleSelectionMode) return;
+    if(bundleSelectionMode || deleteSelectionMode) return; // Prevent completion in selection modes
+
     const task = tasks.find(t => t.id === id); if(!task) return;
     
     // 1. Immediate UI Updates (Strikethrough, etc.)
@@ -737,26 +944,91 @@ function renderTasks() {
     tasks.forEach(task => {
         const isDone = task.status === 'Completed';
         const catInfo = categories.find(c => c.name === task.category);
-        const pts = catInfo ? catInfo.points : 10;
-        const card = document.createElement('div');
-        card.className = `glass-panel p-5 rounded-3xl relative transition-all duration-300 ${isDone ? 'opacity-50 grayscale' : 'hover:-translate-y-1'}`;
+        // Default to 0 XP if category is missing (likely a new imported category)
+        const pts = catInfo ? catInfo.points : 0; 
         
-        if(bundleSelectionMode) {
-            const isSelected = selectedForBundle.includes(task.id);
-            card.className = `glass-panel p-5 rounded-3xl relative transition-all border border-transparent ${isSelected ? 'border-yellow-400 bg-yellow-400/10' : ''}`;
-            card.onclick = () => { toggleSelection(task.id); renderTasks(); };
-            card.innerHTML = `<div class="flex items-center gap-4 pointer-events-none"><div class="w-6 h-6 rounded-full border border-zinc-500 flex items-center justify-center ${isSelected ? 'bg-yellow-400 border-yellow-400 text-black' : ''}">${isSelected ? '<i class="ph-bold ph-check"></i>' : ''}</div><div><h3 class="font-bold text-dynamic-main">${task.subject}</h3><p class="text-xs text-dynamic-muted">${task.category}</p></div></div>`;
-        } else {
-            card.innerHTML = `
-                <div class="flex gap-4">
-                    <label class="relative flex items-center p-3 rounded-full cursor-pointer"><input type="checkbox" data-id="${task.id}" class="w-6 h-6 border border-zinc-500 rounded-full custom-check transition-all" ${isDone ? 'checked' : ''} onchange="toggleTask('${task.id}')"></label>
-                    <div class="flex-1 py-1" onclick="openModal('update', '${task.id}')">
-                        <div class="flex justify-between items-start"><h3 class="font-bold text-lg leading-tight ${isDone ? 'line-through text-dynamic-muted' : 'text-dynamic-main'}">${task.subject}</h3><span class="text-[10px] font-bold bg-black/5 px-2 py-1 rounded-lg text-pink-400 border border-dynamic">${task.category} (+${pts})</span></div>
-                        <p class="text-sm text-dynamic-muted mt-1 line-clamp-1">${task.notes || 'No details'}</p>
-                        <div class="mt-3 flex gap-3 text-xs font-bold text-dynamic-muted"><span class="flex items-center gap-1 ${isDone ? '' : 'text-yellow-500'}"><i class="ph-bold ph-calendar"></i> ${new Date(task.dueDate).toLocaleDateString()}</span></div>
-                    </div>
-                </div>`;
+        const card = document.createElement('div');
+        const isSelected = selectedForDelete.includes(task.id);
+        
+        card.className = `glass-panel p-5 rounded-3xl relative transition-all duration-300 ${isDone ? 'opacity-50 grayscale' : 'hover:-translate-y-1'} task-card-delete-target ${isSelected ? 'selected' : ''}`;
+        
+        // --- BATCH DELETE MODE HANDLER ---
+        if (deleteSelectionMode) {
+            // In batch delete mode, clicking toggles selection
+            card.onclick = () => { toggleDeleteSelection(task.id); };
+            card.innerHTML = `<div class="flex items-center gap-4 pointer-events-none"><div class="w-6 h-6 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-red-400 bg-red-400 text-white' : 'border-zinc-500 text-zinc-500'}">${isSelected ? '<i class="ph-bold ph-trash-fill"></i>' : ''}</div><div><h3 class="font-bold text-dynamic-main">${task.subject}</h3><p class="text-xs text-dynamic-muted">${task.category}</p></div></div>`;
+            list.appendChild(card);
+            return;
         }
+
+        if(bundleSelectionMode) {
+            // Bundle mode UI (retains existing logic)
+            const isBundleSelected = selectedForBundle.includes(task.id);
+            card.className = `glass-panel p-5 rounded-3xl relative transition-all border border-transparent ${isBundleSelected ? 'border-yellow-400 bg-yellow-400/10' : ''}`;
+            card.onclick = () => { toggleSelection(task.id); renderTasks(); };
+            card.innerHTML = `<div class="flex items-center gap-4 pointer-events-none"><div class="w-6 h-6 rounded-full border border-zinc-500 flex items-center justify-center ${isBundleSelected ? 'bg-yellow-400 border-yellow-400 text-black' : ''}">${isBundleSelected ? '<i class="ph-bold ph-check"></i>' : ''}</div><div><h3 class="font-bold text-dynamic-main">${task.subject}</h3><p class="text-xs text-dynamic-muted">${task.category}</p></div></div>`;
+            list.appendChild(card);
+            return;
+        }
+        // --- END BATCH MODE HANDLER ---
+
+        // --- NORMAL MODE UI ---
+        const pointDisplay = pts > 0 ? `+${pts}` : '+0*'; 
+        card.innerHTML = `
+            <div class="flex gap-4">
+                <label class="relative flex items-center p-3 rounded-full cursor-pointer"><input type="checkbox" data-id="${task.id}" class="w-6 h-6 border border-zinc-500 rounded-full custom-check transition-all" ${isDone ? 'checked' : ''} onchange="toggleTask('${task.id}')"></label>
+                <div class="flex-1 py-1" onclick="openModal('update', '${task.id}')">
+                    <div class="flex justify-between items-start"><h3 class="font-bold text-lg leading-tight ${isDone ? 'line-through text-dynamic-muted' : 'text-dynamic-main'}">${task.subject}</h3><span class="text-[10px] font-bold bg-black/5 px-2 py-1 rounded-lg text-pink-400 border border-dynamic">${task.category} (${pointDisplay})</span></div>
+                    <p class="text-sm text-dynamic-muted mt-1 line-clamp-1">${task.notes || 'No details'}</p>
+                    <div class="mt-3 flex gap-3 text-xs font-bold text-dynamic-muted"><span class="flex items-center gap-1 ${isDone ? '' : 'text-yellow-500'}"><i class="ph-bold ph-calendar"></i> ${new Date(task.dueDate).toLocaleDateString()}</span></div>
+                </div>
+            </div>`;
+            
+        // --- LONG PRESS LISTENERS (ONLY IN NORMAL MODE) ---
+        // Start Timer (Long Press Handler)
+        const startLongPress = (e) => {
+            if (e.button === 2 || deleteSelectionMode || bundleSelectionMode) return; // Ignore right-click, ignore if mode active
+            
+            // Clear any previous timer in case of rapid events
+            if (longPressTimer) clearTimeout(longPressTimer);
+
+            longPressTimer = setTimeout(() => {
+                // Prevent task opening modal immediately after long press
+                e.stopPropagation(); 
+                toggleDeleteMode(true);
+                toggleDeleteSelection(task.id);
+            }, 700); // 700ms threshold
+        };
+
+        // Clear Timer
+        const clearLongPress = () => {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+        };
+        
+        // Prevent default click behavior if long press starts
+        const clickHandler = (e) => {
+            if (longPressTimer) {
+                // If a timer was set, it means the user attempted a long press (even if time was too short).
+                // We stop the default click action to prevent the task modal from opening.
+                e.stopPropagation();
+            }
+        };
+
+        // Desktop Events
+        card.addEventListener('mousedown', startLongPress);
+        card.addEventListener('mouseup', clearLongPress);
+        card.addEventListener('mouseleave', clearLongPress); // If mouse leaves element
+        card.addEventListener('click', clickHandler, true); // Capture phase to prevent bubbling
+
+        // Mobile Events
+        card.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent default mobile behavior like scrolling/context menu
+            startLongPress(e);
+        }, { passive: false });
+        card.addEventListener('touchend', clearLongPress);
+        card.addEventListener('touchcancel', clearLongPress);
+            
         list.appendChild(card);
     });
 }
