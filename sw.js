@@ -1,8 +1,10 @@
-const CACHE_NAME = 'levelup-v5';
+const CACHE_NAME = 'levelup-v6'; // <-- Increment version name
 const ASSETS = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './script.js',      // <-- NEW
+  './style.css'       // <-- NEW
 ];
 
 self.addEventListener('install', (e) => {
