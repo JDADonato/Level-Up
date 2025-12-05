@@ -2,7 +2,7 @@
     /* Light Mode Defaults */
     --bg-color: #fef08a; /* Pastel Yellow */
     
-    --text-main: #18181b;       /* Dark text for light bg */
+    --text-main: #18181b; /* Dark text for light bg */
     --text-muted: #52525b;
     
     --glass-bg: rgba(255, 255, 255, 0.6); 
@@ -144,10 +144,16 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
     transform: translateY(0); 
 } 
 
+/* Ensure toast is always on top of the loading overlay (200) */
 #loading-overlay { 
     z-index: 200; 
 } 
+#toast-container {
+    z-index: 210 !important; 
+}
 
+
+/* BUNDLE SELECTION MODE */
 .selection-mode .task-checkbox { 
     display: block !important; 
 }
@@ -158,6 +164,29 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
     border-color: #fcd34d; 
     background: rgba(252, 211, 77, 0.1); 
 }
+
+/* BATCH DELETE MODE */
+.delete-mode main {
+    opacity: 0.5; /* Slightly fade background when in delete mode */
+}
+
+.delete-mode .task-card-delete-target {
+    pointer-events: all; /* Ensure tasks can be clicked */
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.delete-mode .task-card-delete-target.selected {
+    background-color: rgba(248, 113, 113, 0.1); /* Tailwind red-400 with opacity */
+    border-color: #f87171 !important; /* Tailwind red-400 */
+}
+
+/* Hide FAB and Bundle Bar during delete mode */
+.delete-mode #fab-container,
+.delete-mode #bundle-bar {
+    display: none !important;
+}
+
 
 @keyframes float { 
     0%, 100% { 
